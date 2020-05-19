@@ -13,41 +13,23 @@ public class ConstractorUI : MonoBehaviour
     public LevelInfo[,] LevelStructure;    
     public TileType CurrentTileType;
 
+    public static GameObject Canvas { get; set; }
+    public static GameObject MainGame { get; set; }
+    public static GameObject MainCamera { get; set; }
     void Start()
     {
+        Canvas = GameObject.Find("EditorCanvas");
+        MainGame = GameObject.Find("MainGame");
+        MainCamera = GameObject.Find("Main Camera");
+
+        Canvas.SetActive(true);
+        MainGame.SetActive(false);
+
         InstantiateLevelField();
-    }
-
-    public void OnButtonClick()
-    {
-        var tileObject = EventSystem.current.currentSelectedGameObject;
-
-        var tileInfo = tileObject.GetComponent<LevelInfo>();
-        
-        var constractorObject = GameObject.Find("ConstractorUI").GetComponent<ConstractorUI>();
-        var tile = constractorObject.LevelStructure[tileInfo.x, tileInfo.y];
-        tile.TileType = constractorObject.CurrentTileType;
-
-        var image = tileObject.GetComponent<Image>();
-        
-        switch (constractorObject.CurrentTileType)
-        {
-            case TileType.Empty:
-                image.color = new Color(0, 0, 0);
-                break;
-            case TileType.Wall:
-                image.color = new Color(255, 255, 255);
-                break;
-            case TileType.Player:
-                image.color = new Color(255, 255, 0);
-                break;
-
-        }
     }
 
     private void InstantiateLevelField()
     {
-        var Canvas = GameObject.Find("Canvas");
         var ContentTransform = Canvas.transform.Find("Scroll View/Content");
         var canvasRectTransform = ContentTransform.GetComponent<RectTransform>();
         var canvasWidth = canvasRectTransform.rect.width;
@@ -60,12 +42,11 @@ public class ConstractorUI : MonoBehaviour
         var i = 0;
         var j = 0;
 
-        LevelStructure = new LevelInfo[(int)((canvasWidth / blockWidth)-1), (int)((canvasHight / blockHight)-1)];
-        //for (var x = -canvasWidth / 2 + blockWidth; x < canvasWidth / 2 - blockWidth; x = x + blockWidth)
+        var LevelStructureList = new List<List<LevelInfo>>();
         for (float x = 50; x <= canvasWidth-50; x = x + blockWidth)
         {
             j = 0;
-            //for (var y = -canvasHight / 2 + blockHight; y < canvasHight / 2 - blockHight; y = y + blockHight)
+            var verticalList = new List<LevelInfo>();
             for (float y = 50; y <= canvasHight-50; y = y + blockHight)
             {
                 var gameObject = Instantiate(TileButton, ContentTransform);
@@ -76,11 +57,25 @@ public class ConstractorUI : MonoBehaviour
                 levelInfo.x = i;
                 levelInfo.y = j;
                 levelInfo.TileType = TileType.Empty;
-                LevelStructure[i, j] = levelInfo;
+                verticalList.Add(levelInfo);
 
                 var image = gameObject.GetComponent<Image>();
                 image.color = new Color(0, 0, 0);
 
+                j++;
+            }
+            i++;
+            LevelStructureList.Add(verticalList);
+        }
+
+        LevelStructure = new LevelInfo[LevelStructureList.Count, LevelStructureList[0].Count];
+        i = 0;
+        foreach (var row in LevelStructureList)
+        {
+            j = 0;
+            foreach (var column in row)
+            {
+                LevelStructure[i, j] = column;
                 j++;
             }
             i++;

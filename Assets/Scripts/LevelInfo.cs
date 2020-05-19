@@ -14,7 +14,9 @@ public enum TileType
 {
     Empty,
     Wall,
-    Player
+    Player,
+    Enemy,
+    Collectible
 }
  
 

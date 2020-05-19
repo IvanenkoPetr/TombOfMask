@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
@@ -18,33 +19,35 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
-
         if (MovementDirection == Vector3.zero)
         {
-            float h = Input.GetAxisRaw("Horizontal");
-            float v = Input.GetAxisRaw("Vertical");
 
-            if (h == 1f)
-            {
-                MovementDirection = Vector3.right;
-                //nextTile = LevelStructure[currentX + 1, currentY];
-            }
-            else if (h == -1f)
-            {
-                MovementDirection = Vector3.left;
-                //nextTile = LevelStructure[currentX - 1, currentY];
-            }
-            else if (v == 1f)
-            {
-                MovementDirection = Vector3.up;
-                //nextTile = LevelStructure[currentX, currentY+1];
-            }
-            else if (v == -1f)
-            {
-                MovementDirection = Vector3.down;
-                //nextTile = LevelStructure[currentX, currentY - 1];
-            }
+
+            //float h = Input.GetAxisRaw("Horizontal");
+            //float v = Input.GetAxisRaw("Vertical");
+
+            //if (h == 1f)
+            //{
+            //    MovementDirection = Vector3.right;
+            //    //nextTile = LevelStructure[currentX + 1, currentY];
+            //}
+            //else if (h == -1f)
+            //{
+            //    MovementDirection = Vector3.left;
+            //    //nextTile = LevelStructure[currentX - 1, currentY];
+            //}
+            //else if (v == 1f)
+            //{
+            //    MovementDirection = Vector3.up;
+            //    //nextTile = LevelStructure[currentX, currentY+1];
+            //}
+            //else if (v == -1f)
+            //{
+            //    MovementDirection = Vector3.down;
+            //    //nextTile = LevelStructure[currentX, currentY - 1];
+            //}
+
+            MovementDirection = SwipeDetector.GetDirectionFromSwipes();
         }
 
         var currentPosition = transform.position;

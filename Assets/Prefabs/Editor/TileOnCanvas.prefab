@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 953387633011228044}
   - component: {fileID: 1135889954104970822}
   - component: {fileID: 1220577744379645957}
+  - component: {fileID: 8982778265351008686}
   m_Layer: 5
   m_Name: TileOnCanvas
   m_TagString: Untagged
@@ -65,6 +66,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
+    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
+      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_Sprite: {fileID: 0}
   m_Type: 0
   m_PreserveAspect: 0
@@ -114,8 +117,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 3016501526612439309, guid: 88915787c6ae8b849ad85ff989735e39,
-          type: 3}
+      - m_Target: {fileID: 8982778265351008686}
         m_MethodName: OnButtonClick
         m_Mode: 1
         m_Arguments:
@@ -126,6 +128,8 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 1
+    m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
+      Culture=neutral, PublicKeyToken=null
 --- !u!114 &1220577744379645957
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -136,5 +140,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6b3bf72d3b7c9a64e8ee11f2f5d0ac85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &8982778265351008686
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 430107569133545843}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b36ae5aed53efe1419845adfc196237d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
