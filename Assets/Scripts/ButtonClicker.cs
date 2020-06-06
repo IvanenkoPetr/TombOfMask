@@ -57,6 +57,8 @@ public class ButtonClicker : MonoBehaviour
                     case TileType.Enemy:
                         gameObject = Instantiate(Enemy, mainGameObject);
                         gameObject.transform.position = new Vector3(i, j, 0);
+                        var swipeMovement = gameObject.GetComponent<SwipeMovement>();
+                        swipeMovement.LevelStructure = levelStructure;
                         break;
                 }
             }
