@@ -13,6 +13,7 @@ public class PlayerMovement : MonoBehaviour
     private LevelInfo turningPoint;
     private Vector3 turningDirection;
     private Vector3 MovementDirectionUntilTurn;
+    private Vector3 nextTileCoordinate;
 
     // Start is called before the first frame update
     void Start()
@@ -32,8 +33,6 @@ public class PlayerMovement : MonoBehaviour
         {
             MovementWithChangeDirection();
         }
-
-
     }
 
     private void MovementWithChangeDirection()
@@ -98,6 +97,8 @@ public class PlayerMovement : MonoBehaviour
         else
         {
             MovementDirection = Vector3.zero;
+            transform.position = new Vector3((float)Math.Round(transform.position.x),
+                (float)Math.Round(transform.position.y), (float)Math.Round(transform.position.z));
         }
 
     }
@@ -106,35 +107,62 @@ public class PlayerMovement : MonoBehaviour
     {
         var currentX = (int)Math.Round(currentPosition.x);
         var currentY = (int)Math.Round(currentPosition.y);
-        var precision = 0.1;
+        var precision = 0.01f;
 
         LevelInfo nextTile = null;
         if (direction == Vector3.right)
         {
-            if (Math.Abs((float)Math.Round(currentPosition.x) - currentPosition.x) <= precision)
+            if (nextTileCoordinate == Vector3.zero)
             {
-                nextTile = LevelStructure[currentX + 1, currentY];
+                nextTileCoordinate = new Vector3((float)Math.Round(currentPosition.x) + 1, currentPosition.y);
+            }
+
+            if (nextTileCoordinate.x - currentPosition.x <= precision)
+            {
+                nextTile = LevelStructure[(int)nextTileCoordinate.x + 1, currentY];
+                nextTileCoordinate = Vector3.zero;
             }
         }
         else if (direction == Vector3.left)
         {
-            if (Math.Abs((float)Math.Round(currentPosition.x) - currentPosition.x) <= precision)
+
+            if (nextTileCoordinate == Vector3.zero)
             {
-                nextTile = LevelStructure[currentX - 1, currentY];
+                nextTileCoordinate = new Vector3((float)Math.Round(currentPosition.x) - 1, currentPosition.y);
+            }
+
+            if (currentPosition.x - nextTileCoordinate.x <= precision)
+            {
+                nextTile = LevelStructure[(int)nextTileCoordinate.x - 1, currentY];
+                nextTileCoordinate = Vector3.zero;
             }
         }
         else if (direction == Vector3.up)
         {
-            if (Math.Abs((float)Math.Round(currentPosition.y) - currentPosition.y) <= precision)
+
+            //var nextCoordinate = (float)(int)currentPosition.y + 1;
+            if (nextTileCoordinate == Vector3.zero)
             {
-                nextTile = LevelStructure[currentX, currentY + 1];
+                nextTileCoordinate = new Vector3(currentPosition.x, (float)Math.Round(currentPosition.y) + 1);
+            }
+
+            if (nextTileCoordinate.y - currentPosition.y <= precision)
+            {
+                nextTile = LevelStructure[currentX, (int)nextTileCoordinate.y + 1];
+                nextTileCoordinate = Vector3.zero;
             }
         }
         else if (direction == Vector3.down)
         {
-            if (Math.Abs((float)Math.Round(currentPosition.y) - currentPosition.y) <= precision)
+            if (nextTileCoordinate == Vector3.zero)
             {
-                nextTile = LevelStructure[currentX, currentY - 1];
+                nextTileCoordinate = new Vector3((float)(int)currentPosition.x, (float)Math.Round(currentPosition.y) - 1);
+            }
+
+            if (currentPosition.y - nextTileCoordinate.y <= precision)
+            {
+                nextTile = LevelStructure[currentX, (int)nextTileCoordinate.y - 1];
+                nextTileCoordinate = Vector3.zero;
             }
         }
 

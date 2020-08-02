@@ -16,11 +16,18 @@ public class ConstractorUI : MonoBehaviour
     public static GameObject Canvas { get; set; }
     public static GameObject MainGame { get; set; }
     public static GameObject MainCamera { get; set; }
+    public static GameObject UIConstractor { get; set; }
+    public static GameObject LevelInfoInText { get; set; }
+    public static GameObject CanvasContent { get; set; }
+
     void Start()
     {
         Canvas = GameObject.Find("EditorCanvas");
         MainGame = GameObject.Find("MainGame");
         MainCamera = GameObject.Find("Main Camera");
+        UIConstractor = GameObject.Find("ConstractorUI");
+        LevelInfoInText = GameObject.Find("LevelInfoInText");
+        CanvasContent = GameObject.Find("Content");
 
         Canvas.SetActive(true);
         MainGame.SetActive(false);
@@ -30,7 +37,7 @@ public class ConstractorUI : MonoBehaviour
 
     private void InstantiateLevelField()
     {
-        var ContentTransform = Canvas.transform.Find("Scroll View/Content");
+        var ContentTransform = CanvasContent.transform;
         var canvasRectTransform = ContentTransform.GetComponent<RectTransform>();
         var canvasWidth = canvasRectTransform.rect.width;
         var canvasHight = canvasRectTransform.rect.height;
