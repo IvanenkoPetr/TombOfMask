@@ -17,7 +17,6 @@ public class ConstractorUI : MonoBehaviour
     public static GameObject MainGame { get; set; }
     public static GameObject MainCamera { get; set; }
     public static GameObject UIConstractor { get; set; }
-    public static GameObject LevelInfoInText { get; set; }
     public static GameObject CanvasContent { get; set; }
 
     void Start()
@@ -26,7 +25,6 @@ public class ConstractorUI : MonoBehaviour
         MainGame = GameObject.Find("MainGame");
         MainCamera = GameObject.Find("Main Camera");
         UIConstractor = GameObject.Find("ConstractorUI");
-        LevelInfoInText = GameObject.Find("LevelInfoInText");
         CanvasContent = GameObject.Find("Content");
 
         Canvas.SetActive(true);

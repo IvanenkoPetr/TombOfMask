@@ -76,9 +76,7 @@ public class ButtonClicker : MonoBehaviour
 
         var mainGame = ConstractorUI.MainGame;
         mainGame.SetActive(true);
-
-        var inputObject = ConstractorUI.LevelInfoInText.GetComponent<InputField>();
-        inputObject.text = SerializeLevelStructure(levelStructure);
+    
     }
 
     public void OnLoadLevelFromText()
@@ -86,7 +84,7 @@ public class ButtonClicker : MonoBehaviour
         var constractorObject = GameObject.Find("ConstractorUI").GetComponent<ConstractorUI>();
         var levelStructure = constractorObject.LevelStructure;
 
-        var levelStructureInText = ConstractorUI.LevelInfoInText.GetComponent<InputField>().text;
+        var levelStructureInText = Resources.Load<TextAsset>("LevelStructure").text;
         DeserializeLevelStructure(levelStructureInText, levelStructure);
 
         var allTiles = ConstractorUI.CanvasContent.transform;
@@ -98,6 +96,15 @@ public class ButtonClicker : MonoBehaviour
 
     }
 
+    public void OnSaveLevelIntoText()
+    {
+        var constractorObject = GameObject.Find("ConstractorUI").GetComponent<ConstractorUI>();
+        var levelStructure = constractorObject.LevelStructure;
+        var levelInText = SerializeLevelStructure(levelStructure);
+        var folder = Application.temporaryCachePath;
+        File.WriteAllText(string.Concat(folder, "/", "LevelStructureFile.txt"), levelInText);
+
+    }
 
     public string SerializeLevelStructure(LevelInfo[,] levelStructure)
     {
