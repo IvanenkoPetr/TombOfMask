@@ -49,7 +49,7 @@ public class PlayerMovement : MonoBehaviour
             }
             else
             {
-                nextTile = GetNextTile(currentPosition, MovementDirection);
+                nextTile = MovementUtils.GetNextTile(currentPosition, MovementDirection, ref nextTileCoordinate, LevelStructure); 
                 MovementDirectionUntilTurn = MovementDirection;
                 turningPoint = nextTile;
                 turningDirection = movementDirectionFromInput;
@@ -66,8 +66,9 @@ public class PlayerMovement : MonoBehaviour
                 turningDirection = Vector3.zero;
             }
         }
+        
+        nextTile = MovementUtils.GetNextTile(currentPosition, MovementDirection, ref nextTileCoordinate, LevelStructure);
 
-        nextTile = GetNextTile(currentPosition, MovementDirection);
         if ((nextTile == null || nextTile.TileType != TileType.Wall) && MovementDirection != Vector3.zero)
         {
             transform.position = transform.position + MovementDirection * GameSpeed * Time.deltaTime;
@@ -75,6 +76,8 @@ public class PlayerMovement : MonoBehaviour
         else
         {
             MovementDirection = Vector3.zero;
+            transform.position = new Vector3((float)Math.Round(transform.position.x),
+                (float)Math.Round(transform.position.y), (float)Math.Round(transform.position.z));
         }
     }
 
@@ -88,7 +91,8 @@ public class PlayerMovement : MonoBehaviour
         }
 
         var currentPosition = transform.position;
-        LevelInfo nextTile = GetNextTile(currentPosition, MovementDirection);
+        //LevelInfo nextTile = GetNextTile(currentPosition, MovementDirection);
+        LevelInfo nextTile = MovementUtils.GetNextTile(currentPosition, MovementDirection, ref nextTileCoordinate, LevelStructure);
 
         if ((nextTile == null || nextTile.TileType != TileType.Wall) && MovementDirection != Vector3.zero)
         {

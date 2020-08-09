@@ -13,6 +13,17 @@ public class ConstractorUI : MonoBehaviour
     public LevelInfo[,] LevelStructure;    
     public TileType CurrentTileType;
 
+    [SerializeField]
+    public Sprite EmptyTileSprite;
+    [SerializeField]
+    public Sprite WallTileSprite;
+    [SerializeField]
+    public Sprite PlayerTileSprite;
+    [SerializeField]
+    public Sprite EnemyTileSprite;
+    [SerializeField]
+    public Sprite CollectibleTileSprite;
+
     public static GameObject Canvas { get; set; }
     public static GameObject MainGame { get; set; }
     public static GameObject MainCamera { get; set; }
@@ -65,7 +76,8 @@ public class ConstractorUI : MonoBehaviour
                 verticalList.Add(levelInfo);
 
                 var image = gameObject.GetComponent<Image>();
-                image.color = new Color(0, 0, 0);
+                image.sprite = EmptyTileSprite;
+                //image.color = new Color(0, 0, 0);
 
                 j++;
             }

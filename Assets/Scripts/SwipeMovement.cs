@@ -9,6 +9,7 @@ public class SwipeMovement : MonoBehaviour
     Vector3 MovementDirection;
     private float GameSpeed;
     public MovementAxis MovementAxis;
+    private Vector3 nextTileCoordinate;
 
     // Start is called before the first frame update
     void Start()
@@ -35,6 +36,7 @@ public class SwipeMovement : MonoBehaviour
         var currentPosition = transform.position;
 
         LevelInfo nextTile = GetNextTile(currentPosition);
+        nextTile = MovementUtils.GetNextTile(currentPosition, MovementDirection, ref nextTileCoordinate, LevelStructure);
 
         if ((nextTile == null || nextTile.TileType != TileType.Wall))
         {
@@ -112,5 +114,6 @@ public enum MovementAxis
 {
     Vertical,
     Horizontal,
+    Random,
     None
 }

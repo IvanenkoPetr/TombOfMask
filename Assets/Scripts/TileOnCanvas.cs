@@ -27,23 +27,25 @@ public class TileOnCanvas : MonoBehaviour
     public static void SetTileColour(GameObject tileObject, TileType currentTileType)
     {
         var image = tileObject.GetComponent<Image>();
+        var constructorUI = ConstractorUI.UIConstractor.GetComponent<ConstractorUI>();
 
         switch (currentTileType)
         {
             case TileType.Empty:
-                image.color = new Color(0, 0, 0);
+                //image.color = new Color(0, 0, 0);
+                image.sprite = constructorUI.EmptyTileSprite;
                 break;
             case TileType.Wall:
-                image.color = new Color(255, 255, 255);
+                image.sprite = constructorUI.WallTileSprite;
                 break;
             case TileType.Player:
-                image.color = new Color(0, 255, 0);
+                image.sprite = constructorUI.PlayerTileSprite;
                 break;
             case TileType.Enemy:
-                image.color = new Color(255, 0, 0);
+                image.sprite = constructorUI.EnemyTileSprite;
                 break;
             case TileType.Collectible:
-                image.color = new Color(255, 255, 0);
+                image.sprite = constructorUI.CollectibleTileSprite;
                 break;
         }
     }

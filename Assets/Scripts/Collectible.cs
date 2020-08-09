@@ -6,8 +6,10 @@ public class Collectible : MonoBehaviour
 {
     private void OnTriggerEnter2D(Collider2D other)
     {
-
-        Destroy(gameObject);
-
+        var player = other.GetComponent<PlayerMovement>();
+        if (player != null)
+        {
+            Destroy(gameObject);
+        }
     }
 }

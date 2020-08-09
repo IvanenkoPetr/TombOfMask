@@ -101,7 +101,7 @@ public class ButtonClicker : MonoBehaviour
         var constractorObject = GameObject.Find("ConstractorUI").GetComponent<ConstractorUI>();
         var levelStructure = constractorObject.LevelStructure;
         var levelInText = SerializeLevelStructure(levelStructure);
-        var folder = Application.temporaryCachePath;
+        var folder = Application.persistentDataPath;
         File.WriteAllText(string.Concat(folder, "/", "LevelStructureFile.txt"), levelInText);
 
     }
