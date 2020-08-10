@@ -16,7 +16,7 @@ public class ButtonClicker : MonoBehaviour
     public GameObject Player;
     public GameObject Enemy;
     public GameObject Collectible;
-
+    public GameObject Hatch;
 
     private void Update()
     {
@@ -28,6 +28,20 @@ public class ButtonClicker : MonoBehaviour
         var UIConstractor = ConstractorUI.UIConstractor;
         var constractorUIComponent = UIConstractor.GetComponent<ConstractorUI>();
         constractorUIComponent.CurrentTileType = (TileType)Enum.Parse(typeof(TileType), tileType, true);
+
+        var image = ConstractorUI.OpenElementsCanvasButton.GetComponent<Image>();
+        image.sprite = ConstractorUI.AccordanceTileTypeAndSprite[constractorUIComponent.CurrentTileType];
+
+        ConstractorUI.EditorCanvas.SetActive(true);
+        ConstractorUI.MainGame.SetActive(false);
+        ConstractorUI.LevelElementsCanvas.SetActive(false);
+    }
+
+    public void OnOpenElementsCanvasButtonClick()
+    {
+        ConstractorUI.EditorCanvas.SetActive(false);
+        ConstractorUI.MainGame.SetActive(false);
+        ConstractorUI.LevelElementsCanvas.SetActive(true);
     }
 
     public void OnGenerateLevelButtonClick()
@@ -66,12 +80,20 @@ public class ButtonClicker : MonoBehaviour
                         gameObject.transform.position = new Vector3(i, j, 0);
                         var swipeMovement = gameObject.GetComponent<SwipeMovement>();
                         swipeMovement.LevelStructure = levelStructure;
+                        swipeMovement.MovementAxis = MovementAxis.Random;
+                        break;
+                    case TileType.Hatch:
+                        gameObject = Instantiate(Hatch, mainGameObject);
+                        gameObject.transform.position = new Vector3(i, j, 0);
+
+                        var hatchBehaviour = gameObject.GetComponent<Hatch>();
+                        hatchBehaviour.ChangeStateInSeconds = 1.0f;
                         break;
                 }
             }
         }
 
-        var canvas = ConstractorUI.Canvas;
+        var canvas = ConstractorUI.EditorCanvas;
         canvas.SetActive(false);
 
         var mainGame = ConstractorUI.MainGame;

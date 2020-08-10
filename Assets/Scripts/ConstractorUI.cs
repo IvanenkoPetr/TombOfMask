@@ -23,23 +23,44 @@ public class ConstractorUI : MonoBehaviour
     public Sprite EnemyTileSprite;
     [SerializeField]
     public Sprite CollectibleTileSprite;
+    [SerializeField]
+    public Sprite HatchTileSprite;
 
-    public static GameObject Canvas { get; set; }
+
+
+    public static GameObject EditorCanvas { get; set; }
     public static GameObject MainGame { get; set; }
     public static GameObject MainCamera { get; set; }
     public static GameObject UIConstractor { get; set; }
     public static GameObject CanvasContent { get; set; }
+    public static GameObject LevelElementsCanvas { get; set; }
+    public static GameObject OpenElementsCanvasButton { get; set; }
+
+    public static Dictionary<TileType, Sprite> AccordanceTileTypeAndSprite { get; set; }
 
     void Start()
     {
-        Canvas = GameObject.Find("EditorCanvas");
+        EditorCanvas = GameObject.Find("EditorCanvas");
         MainGame = GameObject.Find("MainGame");
         MainCamera = GameObject.Find("Main Camera");
         UIConstractor = GameObject.Find("ConstractorUI");
         CanvasContent = GameObject.Find("Content");
+        LevelElementsCanvas = GameObject.Find("LevelElementsCanvas");
+        OpenElementsCanvasButton = GameObject.Find("OpenElementsCanvasButton");
 
-        Canvas.SetActive(true);
+        AccordanceTileTypeAndSprite = new Dictionary<TileType, Sprite>
+        {
+            [TileType.Collectible] = CollectibleTileSprite,
+            [TileType.Empty] = EmptyTileSprite,
+            [TileType.Enemy] = EnemyTileSprite,
+            [TileType.Hatch] = HatchTileSprite,
+            [TileType.Player] = PlayerTileSprite,
+            [TileType.Wall] = WallTileSprite,
+        };
+
+        EditorCanvas.SetActive(true);
         MainGame.SetActive(false);
+        LevelElementsCanvas.SetActive(false);
 
         InstantiateLevelField();
     }

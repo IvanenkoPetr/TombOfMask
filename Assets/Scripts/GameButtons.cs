@@ -17,7 +17,7 @@ public class GameButtons : MonoBehaviour
             }           
         }
 
-        var canvas = ConstractorUI.Canvas; ;
+        var canvas = ConstractorUI.EditorCanvas; ;
         canvas.SetActive(true);
 
         mainGame.SetActive(false);

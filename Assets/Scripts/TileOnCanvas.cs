@@ -47,6 +47,9 @@ public class TileOnCanvas : MonoBehaviour
             case TileType.Collectible:
                 image.sprite = constructorUI.CollectibleTileSprite;
                 break;
+            case TileType.Hatch:
+                image.sprite = constructorUI.HatchTileSprite;
+                break;
         }
     }
 }

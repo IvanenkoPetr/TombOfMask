@@ -10,9 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 4689311238940119655}
   - component: {fileID: 3367804342690601756}
-  - component: {fileID: 1217796346469172674}
   - component: {fileID: 8693432225185606975}
   - component: {fileID: 6728991359849178587}
+  - component: {fileID: 4653138079175873161}
   m_Layer: 0
   m_Name: Collectible
   m_TagString: Untagged
@@ -71,7 +71,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 9df94b488fa8f6848b679e52ec6facfe, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 4a27a49023b7c0c4d8e20a18758ea3b4, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -82,32 +82,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!61 &1217796346469172674
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8938407526922933299}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: -0.015789628, y: -0.0022131503}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
-    newSize: {x: 0.64, y: 0.64}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 0.7978965, y: 0.78164107}
-  m_EdgeRadius: 0
 --- !u!50 &8693432225185606975
 Rigidbody2D:
   serializedVersion: 4
@@ -141,3 +115,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbffd994ed2841243807732c5ea7e6ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!58 &4653138079175873161
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8938407526922933299}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  serializedVersion: 2
+  m_Radius: 0.27
