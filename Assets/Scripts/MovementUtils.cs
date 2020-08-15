@@ -70,4 +70,77 @@ public static class MovementUtils
         return nextTile;
     }
 
+    public static void SetPosition(Transform transform, ref Vector3 MovementDirection, float GameSpeed, Vector3 positionOnPreviousFrame, LevelInfo[,] LevelStructure)
+    {
+        var positionAfterMovement = transform.position + MovementDirection * GameSpeed * Time.deltaTime;
+        if (MovementDirection == Vector3.right)
+        {
+            var strartPosition = new Vector3((float)Math.Truncate((double)positionOnPreviousFrame.x + 0.001), positionOnPreviousFrame.y, positionOnPreviousFrame.z);
+            while (strartPosition.x < positionAfterMovement.x)
+            {
+                var tileTipe = LevelStructure[(int)strartPosition.x + 1, (int)strartPosition.y].TileType;
+                if (tileTipe == TileType.Wall)
+                {
+                    // return strartPosition;
+                    MovementDirection = Vector3.zero;
+                    transform.position = new Vector3(strartPosition.x, strartPosition.y, strartPosition.z);
+                    return;
+                }
+                strartPosition = new Vector3(strartPosition.x + 1f, strartPosition.y, strartPosition.z);
+            }
+        }
+        else if (MovementDirection == Vector3.left)
+        {
+
+            var strartPosition = new Vector3((float)Math.Truncate((double)positionOnPreviousFrame.x - 0.001) + 1f, positionOnPreviousFrame.y, positionOnPreviousFrame.z);
+            while (strartPosition.x > positionAfterMovement.x)
+            {
+                var tileTipe = LevelStructure[(int)strartPosition.x - 1, (int)strartPosition.y].TileType;
+                if (tileTipe == TileType.Wall)
+                {
+                    //return strartPosition;
+                    MovementDirection = Vector3.zero;
+                    transform.position = new Vector3(strartPosition.x, strartPosition.y, strartPosition.z);
+                    return;
+                }
+                strartPosition = new Vector3(strartPosition.x - 1f, strartPosition.y, strartPosition.z);
+            }
+        }
+        else if (MovementDirection == Vector3.up)
+        {
+            var strartPosition = new Vector3(positionOnPreviousFrame.x, (float)Math.Truncate((double)positionOnPreviousFrame.y + 0.001f), positionOnPreviousFrame.z);
+            while (strartPosition.y < positionAfterMovement.y)
+            {
+                var tileTipe = LevelStructure[(int)strartPosition.x, (int)strartPosition.y + 1].TileType;
+                if (tileTipe == TileType.Wall)
+                {
+                    // return strartPosition;
+                    MovementDirection = Vector3.zero;
+                    transform.position = new Vector3(strartPosition.x, strartPosition.y, strartPosition.z);
+                    return;
+                }
+                strartPosition = new Vector3(strartPosition.x, strartPosition.y + 1f, strartPosition.z);
+
+            }
+        }
+        else if (MovementDirection == Vector3.down)
+        {
+            var strartPosition = new Vector3(positionOnPreviousFrame.x, (float)Math.Truncate((double)positionOnPreviousFrame.y - 0.001) + 1f, positionOnPreviousFrame.z);
+            while (strartPosition.y > positionAfterMovement.y)
+            {
+                var tileTipe = LevelStructure[(int)strartPosition.x, (int)strartPosition.y - 1].TileType;
+                if (tileTipe == TileType.Wall)
+                {
+                    //return strartPosition;
+                    MovementDirection = Vector3.zero;
+                    transform.position = new Vector3(strartPosition.x, strartPosition.y, strartPosition.z);
+                    return;
+                }
+                strartPosition = new Vector3(strartPosition.x, strartPosition.y - 1f, strartPosition.z);
+            }
+        }
+
+        transform.position = positionAfterMovement;
+    }
+
 }

@@ -11,12 +11,14 @@ public class SwipeMovement : MonoBehaviour
     private float GameSpeed;
     public MovementAxis MovementAxis;
     private Vector3 nextTileCoordinate;
+    private Vector3 positionOnPreviousFrame;
 
     // Start is called before the first frame update
     void Start()
     {
+        positionOnPreviousFrame = transform.position;
         GameSpeed = ConstractorUI.MainGame.GetComponent<Settings>().GameSpeed;
-        ChooseNextDirection();
+        ChooseNextDirection(Vector3.zero);
     }
 
     // Update is called once per frame
@@ -27,27 +29,21 @@ public class SwipeMovement : MonoBehaviour
             return;
         }
 
-        var currentPosition = transform.position;
-
-        LevelInfo nextTile = MovementUtils.GetNextTile(currentPosition, MovementDirection, ref nextTileCoordinate, LevelStructure);
-
-        if ((nextTile == null || nextTile.TileType != TileType.Wall))
+        var movementBeforeStop = MovementDirection;
+        MovementUtils.SetPosition(transform, ref MovementDirection, GameSpeed, positionOnPreviousFrame, LevelStructure);
+        positionOnPreviousFrame = transform.position;
+        if(MovementDirection == Vector3.zero)
         {
-            transform.position = transform.position + MovementDirection * GameSpeed * Time.deltaTime;
-        }
-        else
-        {
-            ChooseNextDirection();
-
+            ChooseNextDirection(movementBeforeStop);
         }
 
     }
 
-    private void ChooseNextDirection()
+    private void ChooseNextDirection(Vector3 movementBeforeStop)
     {
         if (MovementAxis == MovementAxis.Vertical)
         {
-            if (MovementDirection == Vector3.up)
+            if (movementBeforeStop == Vector3.up)
             {
                 MovementDirection = Vector3.down;
             }
@@ -58,7 +54,7 @@ public class SwipeMovement : MonoBehaviour
         }
         else if (MovementAxis == MovementAxis.Horizontal)
         {
-            if (MovementDirection == Vector3.left)
+            if (movementBeforeStop == Vector3.left)
             {
                 MovementDirection = Vector3.right;
             }

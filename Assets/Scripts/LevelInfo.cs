@@ -40,6 +40,9 @@ public enum TileType
     Wall,
     Player,
     Enemy,
+    HorizontalEnemy,
+    VerticalEnemy,
+    RandomEnemy,
     Collectible,
     Hatch
 }

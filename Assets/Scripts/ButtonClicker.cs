@@ -44,6 +44,25 @@ public class ButtonClicker : MonoBehaviour
         ConstractorUI.LevelElementsCanvas.SetActive(true);
     }
 
+    public void OnSetLevelSizeButtonClick()
+    {
+        var newWidth = int.Parse(GameObject.Find("FieldWidthInputField").GetComponent<InputField>().text);
+        var newHeight = int.Parse(GameObject.Find("FieldHeightInputField").GetComponent<InputField>().text);
+
+        var children = new List<GameObject>();
+        foreach (Transform child in ConstractorUI.CanvasContent.transform)
+        {
+            children.Add(child.gameObject);
+        };
+        children.ForEach(child => Destroy(child));
+
+        ConstractorUI.UIConstractor.GetComponent<ConstractorUI>().InstantiateLevelField(newWidth, newHeight);
+
+        ConstractorUI.EditorCanvas.SetActive(true);
+        ConstractorUI.MainGame.SetActive(false);
+        ConstractorUI.LevelElementsCanvas.SetActive(false);
+    }
+
     public void OnGenerateLevelButtonClick()
     {
         var mainGameObject = ConstractorUI.MainGame.transform;
@@ -80,6 +99,27 @@ public class ButtonClicker : MonoBehaviour
                         gameObject.transform.position = new Vector3(i, j, 0);
                         var swipeMovement = gameObject.GetComponent<SwipeMovement>();
                         swipeMovement.LevelStructure = levelStructure;
+                        swipeMovement.MovementAxis = MovementAxis.None;
+                        break;
+                    case TileType.HorizontalEnemy:
+                        gameObject = Instantiate(Enemy, mainGameObject);
+                        gameObject.transform.position = new Vector3(i, j, 0);
+                        swipeMovement = gameObject.GetComponent<SwipeMovement>();
+                        swipeMovement.LevelStructure = levelStructure;
+                        swipeMovement.MovementAxis = MovementAxis.Horizontal;
+                        break;
+                    case TileType.VerticalEnemy:
+                        gameObject = Instantiate(Enemy, mainGameObject);
+                        gameObject.transform.position = new Vector3(i, j, 0);
+                        swipeMovement = gameObject.GetComponent<SwipeMovement>();
+                        swipeMovement.LevelStructure = levelStructure;
+                        swipeMovement.MovementAxis = MovementAxis.Vertical;
+                        break;
+                    case TileType.RandomEnemy:
+                        gameObject = Instantiate(Enemy, mainGameObject);
+                        gameObject.transform.position = new Vector3(i, j, 0);
+                        swipeMovement = gameObject.GetComponent<SwipeMovement>();
+                        swipeMovement.LevelStructure = levelStructure;
                         swipeMovement.MovementAxis = MovementAxis.Random;
                         break;
                     case TileType.Hatch:
@@ -98,19 +138,20 @@ public class ButtonClicker : MonoBehaviour
 
         var mainGame = ConstractorUI.MainGame;
         mainGame.SetActive(true);
-    
+
     }
 
     public void OnLoadLevelFromText()
     {
         var constractorObject = GameObject.Find("ConstractorUI").GetComponent<ConstractorUI>();
-        var levelStructure = constractorObject.LevelStructure;
+        //var levelStructure = constractorObject.LevelStructure;
 
         var levelStructureInText = Resources.Load<TextAsset>("LevelStructure").text;
-        DeserializeLevelStructure(levelStructureInText, levelStructure);
+        DeserializeLevelStructure(levelStructureInText);
 
+        var levelStructure = constractorObject.LevelStructure;
         var allTiles = ConstractorUI.CanvasContent.transform;
-        foreach(Transform tile in allTiles)
+        foreach (Transform tile in allTiles)
         {
             var tileLevelInfo = tile.gameObject.GetComponent<LevelInfo>();
             TileOnCanvas.SetTileColour(tile.gameObject, levelStructure[tileLevelInfo.x, tileLevelInfo.y].TileType);
@@ -154,14 +195,23 @@ public class ButtonClicker : MonoBehaviour
         }
     }
 
-    public void DeserializeLevelStructure(string levelStractureInText, LevelInfo[,] levelStructure)
+    public void DeserializeLevelStructure(string levelStractureInText)
     {
+        var children = new List<GameObject>();
+        foreach (Transform child in ConstractorUI.CanvasContent.transform)
+        {
+            children.Add(child.gameObject);
+        };
+        children.ForEach(child => Destroy(child));
 
         var serializer = new XmlSerializer(typeof(List<List<LevelInfoDto>>));
 
         using (TextReader reader = new StringReader(levelStractureInText))
         {
             var levelStructureFromText = (List<List<LevelInfoDto>>)serializer.Deserialize(reader);
+
+            ConstractorUI.UIConstractor.GetComponent<ConstractorUI>().InstantiateLevelField(levelStructureFromText.Count, levelStructureFromText[0].Count);
+            var levelStructure = ConstractorUI.UIConstractor.GetComponent<ConstractorUI>().LevelStructure;
             for (var i = 0; i < levelStructureFromText.Count; i++)
             {
                 for (var j = 0; j < levelStructureFromText[0].Count; j++)
@@ -170,12 +220,11 @@ public class ButtonClicker : MonoBehaviour
 
                     levelElement.x = levelStructureFromText[i][j].x;
                     levelElement.y = levelStructureFromText[i][j].y;
-                    levelElement.TileType = levelStructureFromText[i][j].TileType;     
+                    levelElement.TileType = levelStructureFromText[i][j].TileType;
                 }
             }
 
-
-        }
+              }
 
     }
 

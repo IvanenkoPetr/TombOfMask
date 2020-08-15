@@ -22,6 +22,12 @@ public class ConstractorUI : MonoBehaviour
     [SerializeField]
     public Sprite EnemyTileSprite;
     [SerializeField]
+    public Sprite HorizontalEnemyTileSprite;
+    [SerializeField]
+    public Sprite VerticalEnemyTileSprite;
+    [SerializeField]
+    public Sprite RandomEnemyTileSprite;
+    [SerializeField]
     public Sprite CollectibleTileSprite;
     [SerializeField]
     public Sprite HatchTileSprite;
@@ -53,6 +59,9 @@ public class ConstractorUI : MonoBehaviour
             [TileType.Collectible] = CollectibleTileSprite,
             [TileType.Empty] = EmptyTileSprite,
             [TileType.Enemy] = EnemyTileSprite,
+            [TileType.HorizontalEnemy] = HorizontalEnemyTileSprite,
+            [TileType.VerticalEnemy] = VerticalEnemyTileSprite,
+            [TileType.RandomEnemy] = RandomEnemyTileSprite,
             [TileType.Hatch] = HatchTileSprite,
             [TileType.Player] = PlayerTileSprite,
             [TileType.Wall] = WallTileSprite,
@@ -63,6 +72,21 @@ public class ConstractorUI : MonoBehaviour
         LevelElementsCanvas.SetActive(false);
 
         InstantiateLevelField();
+    }
+
+    public void InstantiateLevelField(int widthInBlocks, int heightInBlocks)
+    {
+        var wallBlockRectTransform = TileButton.GetComponent<RectTransform>();
+        var blockWidth = wallBlockRectTransform.rect.width;
+        var blockHight = wallBlockRectTransform.rect.height;
+
+        var ContentTransform = CanvasContent.transform;
+        var canvasRectTransform = ContentTransform.GetComponent<RectTransform>();
+        canvasRectTransform.sizeDelta = new Vector2(widthInBlocks * blockWidth + 65, heightInBlocks * blockHight + 65);
+        InstantiateLevelField();
+
+
+
     }
 
     private void InstantiateLevelField()
@@ -98,8 +122,6 @@ public class ConstractorUI : MonoBehaviour
 
                 var image = gameObject.GetComponent<Image>();
                 image.sprite = EmptyTileSprite;
-                //image.color = new Color(0, 0, 0);
-
                 j++;
             }
             i++;

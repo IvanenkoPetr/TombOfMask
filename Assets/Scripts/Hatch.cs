@@ -8,7 +8,8 @@ public class Hatch : MonoBehaviour
 {
     public HatchState CurrentState;
     public float ChangeStateInSeconds;
-    private float miliseconds;
+    private float seconds;
+    private float timeToSwitchState = 2f;
     // Start is called before the first frame update
     void Start()
     {
@@ -23,11 +24,11 @@ public class Hatch : MonoBehaviour
 
     void FixedUpdate()
     {
-        miliseconds += 0.02f;
-        if (miliseconds >= 2f)
+        seconds += 0.02f;
+        if (seconds >= timeToSwitchState)
         {
             ChangeState();
-            miliseconds = 0f;
+            seconds = 0f;
         }
     }
 
@@ -51,11 +52,11 @@ public class Hatch : MonoBehaviour
         if (CurrentState == HatchState.Closed)
         {
             CurrentState = HatchState.Opened;
-            image.color = new Color(0, 255, 0);
+            image.color = new Color(255, 0, 0);
         }else if (CurrentState == HatchState.Opened)
         {
             CurrentState = HatchState.Closed;
-            image.color = new Color(255, 0, 0);
+            image.color = new Color(0, 255, 0);
         }
     }
 }
