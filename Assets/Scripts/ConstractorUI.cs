@@ -10,8 +10,12 @@ public class ConstractorUI : MonoBehaviour
     // Start is called before the first frame update
     [SerializeField]
     private GameObject TileButton;
+    [SerializeField]
+    public GameObject SpikesButton;
     public LevelInfo[,] LevelStructure;    
     public TileType CurrentTileType;
+    public SpikeType CurrentSpikeType;
+    public bool IsCurrentTypeTile;
 
     [SerializeField]
     public Sprite EmptyTileSprite;
@@ -32,17 +36,26 @@ public class ConstractorUI : MonoBehaviour
     [SerializeField]
     public Sprite HatchTileSprite;
 
-
+    [SerializeField]
+    public Sprite LeftSpikeSprite;
+    [SerializeField]
+    public Sprite RightSpikeSprite;
+    [SerializeField]
+    public Sprite TopSpikeSprite;
+    [SerializeField]
+    public Sprite BottomSpikeSprite;
 
     public static GameObject EditorCanvas { get; set; }
     public static GameObject MainGame { get; set; }
     public static GameObject MainCamera { get; set; }
     public static GameObject UIConstractor { get; set; }
-    public static GameObject CanvasContent { get; set; }
+    public static GameObject MainLayerOnCanvas { get; set; }
+    public static GameObject SpikeLayerOnCanvas { get; set; }
     public static GameObject LevelElementsCanvas { get; set; }
     public static GameObject OpenElementsCanvasButton { get; set; }
 
     public static Dictionary<TileType, Sprite> AccordanceTileTypeAndSprite { get; set; }
+    public static Dictionary<SpikeType, Sprite> AccordanceSpikeTypeAndSprite { get; set; }
 
     void Start()
     {
@@ -50,7 +63,8 @@ public class ConstractorUI : MonoBehaviour
         MainGame = GameObject.Find("MainGame");
         MainCamera = GameObject.Find("Main Camera");
         UIConstractor = GameObject.Find("ConstractorUI");
-        CanvasContent = GameObject.Find("Content");
+        MainLayerOnCanvas = GameObject.Find("MainLayer");
+        SpikeLayerOnCanvas = GameObject.Find("SpikesLayer");
         LevelElementsCanvas = GameObject.Find("LevelElementsCanvas");
         OpenElementsCanvasButton = GameObject.Find("OpenElementsCanvasButton");
 
@@ -67,6 +81,14 @@ public class ConstractorUI : MonoBehaviour
             [TileType.Wall] = WallTileSprite,
         };
 
+        AccordanceSpikeTypeAndSprite = new Dictionary<SpikeType, Sprite>
+        {
+            [SpikeType.Bottom] = BottomSpikeSprite,
+            [SpikeType.Top] = TopSpikeSprite,
+            [SpikeType.Right] = RightSpikeSprite,
+            [SpikeType.Left] = LeftSpikeSprite
+        };
+
         EditorCanvas.SetActive(true);
         MainGame.SetActive(false);
         LevelElementsCanvas.SetActive(false);
@@ -80,22 +102,27 @@ public class ConstractorUI : MonoBehaviour
         var blockWidth = wallBlockRectTransform.rect.width;
         var blockHight = wallBlockRectTransform.rect.height;
 
-        var ContentTransform = CanvasContent.transform;
+        var ContentTransform = MainLayerOnCanvas.transform;
         var canvasRectTransform = ContentTransform.GetComponent<RectTransform>();
         canvasRectTransform.sizeDelta = new Vector2(widthInBlocks * blockWidth + 65, heightInBlocks * blockHight + 65);
+
+        var SpikeTransform = SpikeLayerOnCanvas.transform;
+        var canvasSpikeRectTransform = SpikeTransform.GetComponent<RectTransform>();
+        canvasSpikeRectTransform.sizeDelta = new Vector2(widthInBlocks * blockWidth + 65, heightInBlocks * blockHight + 65);
+
         InstantiateLevelField();
-
-
-
     }
 
     private void InstantiateLevelField()
     {
-        var ContentTransform = CanvasContent.transform;
+        var ContentTransform = MainLayerOnCanvas.transform;
         var canvasRectTransform = ContentTransform.GetComponent<RectTransform>();
         var canvasWidth = canvasRectTransform.rect.width;
         var canvasHight = canvasRectTransform.rect.height;
-        
+
+        var parentOfContent = ContentTransform.parent.gameObject.GetComponent<RectTransform>();
+        parentOfContent.sizeDelta = new Vector2(canvasRectTransform.rect.width, canvasRectTransform.rect.height);
+
         var wallBlockRectTransform = TileButton.GetComponent<RectTransform>();
         var blockWidth = wallBlockRectTransform.rect.width;
         var blockHight = wallBlockRectTransform.rect.height;

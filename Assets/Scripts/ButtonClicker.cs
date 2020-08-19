@@ -28,9 +28,25 @@ public class ButtonClicker : MonoBehaviour
         var UIConstractor = ConstractorUI.UIConstractor;
         var constractorUIComponent = UIConstractor.GetComponent<ConstractorUI>();
         constractorUIComponent.CurrentTileType = (TileType)Enum.Parse(typeof(TileType), tileType, true);
+        constractorUIComponent.IsCurrentTypeTile = true;
 
         var image = ConstractorUI.OpenElementsCanvasButton.GetComponent<Image>();
         image.sprite = ConstractorUI.AccordanceTileTypeAndSprite[constractorUIComponent.CurrentTileType];
+
+        ConstractorUI.EditorCanvas.SetActive(true);
+        ConstractorUI.MainGame.SetActive(false);
+        ConstractorUI.LevelElementsCanvas.SetActive(false);
+    }
+
+    public void OnSpikeButtonClick(string spikeType)
+    {
+        var UIConstractor = ConstractorUI.UIConstractor;
+        var constractorUIComponent = UIConstractor.GetComponent<ConstractorUI>();
+        constractorUIComponent.CurrentSpikeType = (SpikeType)Enum.Parse(typeof(SpikeType), spikeType, true);
+        constractorUIComponent.IsCurrentTypeTile = false;
+
+        var image = ConstractorUI.OpenElementsCanvasButton.GetComponent<Image>();
+        image.sprite = ConstractorUI.AccordanceSpikeTypeAndSprite[constractorUIComponent.CurrentSpikeType];
 
         ConstractorUI.EditorCanvas.SetActive(true);
         ConstractorUI.MainGame.SetActive(false);
@@ -50,7 +66,7 @@ public class ButtonClicker : MonoBehaviour
         var newHeight = int.Parse(GameObject.Find("FieldHeightInputField").GetComponent<InputField>().text);
 
         var children = new List<GameObject>();
-        foreach (Transform child in ConstractorUI.CanvasContent.transform)
+        foreach (Transform child in ConstractorUI.MainLayerOnCanvas.transform)
         {
             children.Add(child.gameObject);
         };
@@ -73,12 +89,25 @@ public class ButtonClicker : MonoBehaviour
         {
             for (var j = 0; j < levelStructure.GetLength(1); j++)
             {
-                var tileType = levelStructure[i, j].TileType;
+                var tileInfo = levelStructure[i, j];
+                var tileType = tileInfo.TileType;
                 switch (tileType)
                 {
                     case TileType.Wall:
+
                         var gameObject = Instantiate(Wall, mainGameObject);
                         gameObject.transform.position = new Vector3(i, j, 0);
+                        if (tileInfo.Options != null)
+                        {
+                            var spikeLayer = gameObject.transform.Find("SpikesLayer").gameObject;
+                            spikeLayer.SetActive(true);
+                            var spikesInfo = (Dictionary<SpikeType,bool>)tileInfo.Options;
+                            foreach(var spike in spikesInfo)
+                            {
+                                spikeLayer.transform.Find(spike.Key.ToString()).gameObject.SetActive(spike.Value);
+                            }
+                        }
+
                         break;
                     case TileType.Player:
                         gameObject = Instantiate(Player, mainGameObject);
@@ -144,13 +173,12 @@ public class ButtonClicker : MonoBehaviour
     public void OnLoadLevelFromText()
     {
         var constractorObject = GameObject.Find("ConstractorUI").GetComponent<ConstractorUI>();
-        //var levelStructure = constractorObject.LevelStructure;
 
         var levelStructureInText = Resources.Load<TextAsset>("LevelStructure").text;
         DeserializeLevelStructure(levelStructureInText);
 
         var levelStructure = constractorObject.LevelStructure;
-        var allTiles = ConstractorUI.CanvasContent.transform;
+        var allTiles = ConstractorUI.MainLayerOnCanvas.transform;
         foreach (Transform tile in allTiles)
         {
             var tileLevelInfo = tile.gameObject.GetComponent<LevelInfo>();
@@ -165,7 +193,8 @@ public class ButtonClicker : MonoBehaviour
         var levelStructure = constractorObject.LevelStructure;
         var levelInText = SerializeLevelStructure(levelStructure);
         var folder = Application.persistentDataPath;
-        File.WriteAllText(string.Concat(folder, "/", "LevelStructureFile.txt"), levelInText);
+        folder = @"C:\temp";
+        File.WriteAllText(string.Concat(folder, "/", "LevelStructure.txt"), levelInText);
 
     }
 
@@ -185,12 +214,11 @@ public class ButtonClicker : MonoBehaviour
             levelStructureDto.Add(row);
         }
 
-        var q = new StringBuilder();
-        using (var stream = XmlWriter.Create(q))
+        var stringBuilder = new StringBuilder();
+        using (var stream = XmlWriter.Create(stringBuilder))
         {
-            // сериализуем весь массив people
             formatter.Serialize(stream, levelStructureDto);
-            return q.ToString();
+            return stringBuilder.ToString();
 
         }
     }
@@ -198,7 +226,7 @@ public class ButtonClicker : MonoBehaviour
     public void DeserializeLevelStructure(string levelStractureInText)
     {
         var children = new List<GameObject>();
-        foreach (Transform child in ConstractorUI.CanvasContent.transform)
+        foreach (Transform child in ConstractorUI.MainLayerOnCanvas.transform)
         {
             children.Add(child.gameObject);
         };
@@ -221,11 +249,20 @@ public class ButtonClicker : MonoBehaviour
                     levelElement.x = levelStructureFromText[i][j].x;
                     levelElement.y = levelStructureFromText[i][j].y;
                     levelElement.TileType = levelStructureFromText[i][j].TileType;
+
+                    if (levelElement.TileType == TileType.Wall)
+                    {
+                        var spikesOnWall = new Dictionary<SpikeType, bool>();
+                        foreach (var spikeDto in levelStructureFromText[i][j].SpikesInfo)
+                        {
+                            spikesOnWall.Add(spikeDto.SpikeType, spikeDto.IsSetted);
+                        }
+
+                        levelElement.Options = spikesOnWall;
+                    }
                 }
             }
-
-              }
-
+        }
     }
 
 }
