@@ -82,7 +82,8 @@ public static class MovementUtils
                 var tileTipe = tile.TileType;
                 if (tileTipe == TileType.Wall)
                 {
-                    if (CheckSpikesCollision(tile, MovementDirection))
+                    var isPlayer = transform.gameObject.GetComponent<PlayerMovement>() != null;
+                    if (isPlayer && CheckSpikesCollision(tile, MovementDirection))
                     {
                         var camera = ConstractorUI.MainCamera;
                         camera.transform.SetParent(null);
@@ -109,7 +110,8 @@ public static class MovementUtils
                 var tileTipe = tile.TileType;
                 if (tileTipe == TileType.Wall)
                 {
-                    if (CheckSpikesCollision(tile, MovementDirection))
+                    var isPlayer = transform.gameObject.GetComponent<PlayerMovement>() != null;
+                    if (isPlayer && CheckSpikesCollision(tile, MovementDirection))
                     {
                         var camera = ConstractorUI.MainCamera;
                         camera.transform.SetParent(null);
@@ -135,7 +137,8 @@ public static class MovementUtils
                 var tileTipe = tile.TileType;
                 if (tileTipe == TileType.Wall)
                 {
-                    if (CheckSpikesCollision(tile, MovementDirection))
+                    var isPlayer = transform.gameObject.GetComponent<PlayerMovement>() != null;
+                    if (isPlayer && CheckSpikesCollision(tile, MovementDirection))
                     {
                         var camera = ConstractorUI.MainCamera;
                         camera.transform.SetParent(null);
@@ -162,7 +165,8 @@ public static class MovementUtils
                 var tileTipe = tile.TileType;
                 if (tileTipe == TileType.Wall)
                 {
-                    if (CheckSpikesCollision(tile, MovementDirection))
+                    var isPlayer = transform.gameObject.GetComponent<PlayerMovement>() != null;
+                    if (isPlayer && CheckSpikesCollision(tile, MovementDirection))
                     {
                         var camera = ConstractorUI.MainCamera;
                         camera.transform.SetParent(null);

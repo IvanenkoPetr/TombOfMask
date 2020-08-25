@@ -52,7 +52,9 @@ public class TileOnCanvas : MonoBehaviour
             if(tile.TileType == TileType.Wall)
             {
                 var spikes = (Dictionary<SpikeType, bool>)tile.Options;
-                spikes[constractorObject.CurrentSpikeType] = true;
+                //spikes[constractorObject.CurrentSpikeType] = true;
+                var newValue = !spikes[constractorObject.CurrentSpikeType];
+                spikes[constractorObject.CurrentSpikeType] = newValue;
 
                 var tileOnCanvas = tileObject.GetComponent<TileOnCanvas>();
                 GameObject gameObject = null;
@@ -70,7 +72,7 @@ public class TileOnCanvas : MonoBehaviour
                     gameObject = tileOnCanvas.SpikesTile;
                 }
 
-                gameObject.transform.Find(constractorObject.CurrentSpikeType.ToString()).gameObject.SetActive(true);
+                gameObject.transform.Find(constractorObject.CurrentSpikeType.ToString()).gameObject.SetActive(newValue);
             }
             
         }

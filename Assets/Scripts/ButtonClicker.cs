@@ -225,12 +225,7 @@ public class ButtonClicker : MonoBehaviour
 
     public void DeserializeLevelStructure(string levelStractureInText)
     {
-        var children = new List<GameObject>();
-        foreach (Transform child in ConstractorUI.MainLayerOnCanvas.transform)
-        {
-            children.Add(child.gameObject);
-        };
-        children.ForEach(child => Destroy(child));
+        DestroyCanvasObjects();
 
         var serializer = new XmlSerializer(typeof(List<List<LevelInfoDto>>));
 
@@ -265,4 +260,20 @@ public class ButtonClicker : MonoBehaviour
         }
     }
 
+    private static void DestroyCanvasObjects()
+    {
+        var children = new List<GameObject>();
+        foreach (Transform child in ConstractorUI.MainLayerOnCanvas.transform)
+        {
+            children.Add(child.gameObject);
+        };
+        children.ForEach(child => Destroy(child));
+
+        children = new List<GameObject>();
+        foreach (Transform child in ConstractorUI.SpikeLayerOnCanvas.transform)
+        {
+            children.Add(child.gameObject);
+        };
+        children.ForEach(child => Destroy(child));
+    }
 }
