@@ -22,5 +22,8 @@ public class GameButtons : MonoBehaviour
 
         mainGame.SetActive(false);
 
+        var gameMenu = ConstractorUI.GameMenu;
+        gameMenu.SetActive(false);
+
     }
 }

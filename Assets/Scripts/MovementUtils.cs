@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DG.Tweening;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -93,6 +94,15 @@ public static class MovementUtils
                     {
                         MovementDirection = Vector3.zero;
                         transform.position = new Vector3(strartPosition.x, strartPosition.y, strartPosition.z);
+                        if (isPlayer)
+                        {
+                            DOTween.Sequence().Append(transform.DOScaleX(0.75f, 2f))
+                                .Append(transform.DOScaleX(1f, 2f));
+
+                            DOTween.Sequence().Append(transform.DOMoveX(transform.position.x + 0.125f, 2f))
+                                .Append(transform.DOMoveX(transform.position.x, 2f));
+                        }
+
                     }
 
                     return;
@@ -121,6 +131,15 @@ public static class MovementUtils
                     {
                         MovementDirection = Vector3.zero;
                         transform.position = new Vector3(strartPosition.x, strartPosition.y, strartPosition.z);
+
+                        if (isPlayer)
+                        {
+                            DOTween.Sequence().Append(transform.DOScaleX(0.75f, 2f))
+                                .Append(transform.DOScaleX(1f, 2f));
+
+                            DOTween.Sequence().Append(transform.DOMoveX(transform.position.x - 0.125f, 2f))
+                                .Append(transform.DOMoveX(transform.position.x, 2f));
+                        }
                     }
 
                     return;
@@ -148,6 +167,15 @@ public static class MovementUtils
                     {
                         MovementDirection = Vector3.zero;
                         transform.position = new Vector3(strartPosition.x, strartPosition.y, strartPosition.z);
+                        
+                        if (isPlayer)
+                        {
+                            DOTween.Sequence().Append(transform.DOScaleY(0.75f, 2f))
+                                .Append(transform.DOScaleY(1f, 2f));
+
+                            DOTween.Sequence().Append(transform.DOMoveY(transform.position.y + 0.125f, 2f))
+                                .Append(transform.DOMoveY(transform.position.y, 2f));
+                        }
                     }
 
                     return;
@@ -176,6 +204,15 @@ public static class MovementUtils
                     {
                         MovementDirection = Vector3.zero;
                         transform.position = new Vector3(strartPosition.x, strartPosition.y, strartPosition.z);
+
+                        if (isPlayer)
+                        {
+                            DOTween.Sequence().Append(transform.DOScaleY(0.75f, 2f))
+                                .Append(transform.DOScaleY(1f, 2f));
+
+                            DOTween.Sequence().Append(transform.DOMoveY(transform.position.y - 0.125f, 2f))
+                                .Append(transform.DOMoveY(transform.position.y, 2f));
+                        }
                     }
                     return;
                 }

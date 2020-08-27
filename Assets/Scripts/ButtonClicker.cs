@@ -168,6 +168,9 @@ public class ButtonClicker : MonoBehaviour
         var mainGame = ConstractorUI.MainGame;
         mainGame.SetActive(true);
 
+        var gameMenu = ConstractorUI.GameMenu;
+        gameMenu.SetActive(true);
+
     }
 
     public void OnLoadLevelFromText()

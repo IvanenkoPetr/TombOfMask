@@ -47,6 +47,7 @@ public class ConstractorUI : MonoBehaviour
 
     public static GameObject EditorCanvas { get; set; }
     public static GameObject MainGame { get; set; }
+    public static GameObject GameMenu{ get; set; }
     public static GameObject MainCamera { get; set; }
     public static GameObject UIConstractor { get; set; }
     public static GameObject MainLayerOnCanvas { get; set; }
@@ -59,13 +60,14 @@ public class ConstractorUI : MonoBehaviour
 
     void Start()
     {
-        EditorCanvas = GameObject.Find("EditorCanvas");
+        EditorCanvas = GameObject.Find("MainMenu");
         MainGame = GameObject.Find("MainGame");
-        MainCamera = GameObject.Find("Main Camera");
+        GameMenu = GameObject.Find("GameMenu");
+        MainCamera = GameObject.Find("MainCamera");
         UIConstractor = GameObject.Find("ConstractorUI");
         MainLayerOnCanvas = GameObject.Find("MainLayer");
         SpikeLayerOnCanvas = GameObject.Find("SpikesLayer");
-        LevelElementsCanvas = GameObject.Find("LevelElementsCanvas");
+        LevelElementsCanvas = GameObject.Find("LevelElementsMenu");
         OpenElementsCanvasButton = GameObject.Find("OpenElementsCanvasButton");
 
         AccordanceTileTypeAndSprite = new Dictionary<TileType, Sprite>
@@ -92,6 +94,7 @@ public class ConstractorUI : MonoBehaviour
         EditorCanvas.SetActive(true);
         MainGame.SetActive(false);
         LevelElementsCanvas.SetActive(false);
+        GameMenu.SetActive(false);
 
         InstantiateLevelField();
     }
