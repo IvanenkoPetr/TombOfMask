@@ -167,7 +167,7 @@ public static class MovementUtils
                     {
                         MovementDirection = Vector3.zero;
                         transform.position = new Vector3(strartPosition.x, strartPosition.y, strartPosition.z);
-                        
+
                         if (isPlayer)
                         {
                             DOTween.Sequence().Append(transform.DOScaleY(0.75f, 2f))
@@ -223,7 +223,76 @@ public static class MovementUtils
         transform.position = positionAfterMovement;
     }
 
-    private static bool CheckSpikesCollision(LevelInfo tile, Vector3 movementDirection)
+    public static (Vector3 newPosition, LevelInfo nextTile) GetPosition(Transform transform, Vector3 MovementDirection, float GameSpeed, Vector3 positionOnPreviousFrame, LevelInfo[,] LevelStructure)
+    {
+        var positionAfterMovement = transform.position + MovementDirection * GameSpeed * Time.deltaTime;
+        if (MovementDirection == Vector3.right)
+        {
+            var strartPosition = new Vector3((float)Math.Truncate((double)positionOnPreviousFrame.x + 0.001), positionOnPreviousFrame.y, positionOnPreviousFrame.z);
+            while (strartPosition.x < positionAfterMovement.x)
+            {
+                var tile = LevelStructure[(int)strartPosition.x + 1, (int)strartPosition.y];
+                var tileTipe = tile.TileType;
+                if (tileTipe == TileType.Wall)
+                {
+                    var stopPosition = new Vector3(strartPosition.x, strartPosition.y, strartPosition.z);
+                    return (stopPosition, tile);
+                }
+                strartPosition = new Vector3(strartPosition.x + 1f, strartPosition.y, strartPosition.z);
+            }
+        }
+        else if (MovementDirection == Vector3.left)
+        {
+
+            var strartPosition = new Vector3((float)Math.Truncate((double)positionOnPreviousFrame.x - 0.001) + 1f, positionOnPreviousFrame.y, positionOnPreviousFrame.z);
+            while (strartPosition.x > positionAfterMovement.x)
+            {
+                var tile = LevelStructure[(int)strartPosition.x - 1, (int)strartPosition.y];
+                var tileTipe = tile.TileType;
+                if (tileTipe == TileType.Wall)
+                {
+                    var stopPosition = new Vector3(strartPosition.x, strartPosition.y, strartPosition.z);
+                    return (stopPosition, tile);
+                }
+                strartPosition = new Vector3(strartPosition.x - 1f, strartPosition.y, strartPosition.z);
+            }
+        }
+        else if (MovementDirection == Vector3.up)
+        {
+            var strartPosition = new Vector3(positionOnPreviousFrame.x, (float)Math.Truncate((double)positionOnPreviousFrame.y + 0.001f), positionOnPreviousFrame.z);
+            while (strartPosition.y < positionAfterMovement.y)
+            {
+                var tile = LevelStructure[(int)strartPosition.x, (int)strartPosition.y + 1];
+                var tileTipe = tile.TileType;
+                if (tileTipe == TileType.Wall)
+                {
+                    var stopPosition = new Vector3(strartPosition.x, strartPosition.y, strartPosition.z);
+                    return (stopPosition, tile);
+                }
+                strartPosition = new Vector3(strartPosition.x, strartPosition.y + 1f, strartPosition.z);
+            }
+        }
+
+        else if (MovementDirection == Vector3.down)
+        {
+            var strartPosition = new Vector3(positionOnPreviousFrame.x, (float)Math.Truncate((double)positionOnPreviousFrame.y - 0.001) + 1f, positionOnPreviousFrame.z);
+            while (strartPosition.y > positionAfterMovement.y)
+            {
+                var tile = LevelStructure[(int)strartPosition.x, (int)strartPosition.y - 1];
+                var tileTipe = tile.TileType;
+                if (tileTipe == TileType.Wall)
+                {
+                    var stopPosition = new Vector3(strartPosition.x, strartPosition.y, strartPosition.z);
+                    return (stopPosition, tile);
+                }
+
+                strartPosition = new Vector3(strartPosition.x, strartPosition.y - 1f, strartPosition.z);
+            }
+        }
+        return (positionAfterMovement, null);
+    }
+
+    public static bool CheckSpikesCollision(LevelInfo tile, Vector3 movementDirection)
     {
         var result = false;
         var spikesOnWall = (Dictionary<SpikeType, bool>)tile.Options;
@@ -246,5 +315,61 @@ public static class MovementUtils
         };
 
         return result;
+    }
+
+    public static void DoWallCollisionAnimation(Vector3 movementDirection, Transform gameObjectTransform, float wallCollisionAnimationSpeed)
+    {
+        var gameObject = gameObjectTransform.gameObject;
+        var player = gameObject.GetComponent<PlayerMovement>();
+        TweenCallback callback = null;
+        if (player != null)
+        {
+            player.isStoped = true;
+            callback = () => player.isStoped = false;
+        }
+        else
+        {
+            var enemy = gameObject.GetComponent<SwipeMovement>();
+            enemy.isStoped = true;
+            callback = () => enemy.isStoped = false;
+        }
+
+        if (movementDirection == Vector3.right)
+        {
+
+            DOTween.Sequence().Append(gameObjectTransform.DOScaleX(0.75f, wallCollisionAnimationSpeed))
+                .Append(gameObjectTransform.DOScaleX(1f, wallCollisionAnimationSpeed)).AppendCallback(callback);
+
+            DOTween.Sequence().Append(gameObjectTransform.DOMoveX(gameObjectTransform.position.x + 0.125f, wallCollisionAnimationSpeed))
+                .Append(gameObjectTransform.DOMoveX(gameObjectTransform.position.x, wallCollisionAnimationSpeed));
+
+        }
+        else if (movementDirection == Vector3.left)
+        {
+            DOTween.Sequence().Append(gameObjectTransform.DOScaleX(0.75f, wallCollisionAnimationSpeed))
+                .Append(gameObjectTransform.DOScaleX(1f, wallCollisionAnimationSpeed)).AppendCallback(callback);
+
+            DOTween.Sequence().Append(gameObjectTransform.DOMoveX(gameObjectTransform.position.x - 0.125f, wallCollisionAnimationSpeed))
+                .Append(gameObjectTransform.DOMoveX(gameObjectTransform.position.x, wallCollisionAnimationSpeed));
+
+        }
+        else if (movementDirection == Vector3.up)
+        {
+
+            DOTween.Sequence().Append(gameObjectTransform.DOScaleY(0.75f, wallCollisionAnimationSpeed))
+                .Append(gameObjectTransform.DOScaleY(1f, wallCollisionAnimationSpeed)).AppendCallback(callback);
+
+            DOTween.Sequence().Append(gameObjectTransform.DOMoveY(gameObjectTransform.position.y + 0.125f, wallCollisionAnimationSpeed))
+                .Append(gameObjectTransform.DOMoveY(gameObjectTransform.position.y, wallCollisionAnimationSpeed));
+
+        }
+        else if (movementDirection == Vector3.down)
+        {
+            DOTween.Sequence().Append(gameObjectTransform.DOScaleY(0.75f, wallCollisionAnimationSpeed))
+                .Append(gameObjectTransform.DOScaleY(1f, wallCollisionAnimationSpeed)).AppendCallback(callback);
+
+            DOTween.Sequence().Append(gameObjectTransform.DOMoveY(gameObjectTransform.position.y - 0.125f, wallCollisionAnimationSpeed))
+                .Append(gameObjectTransform.DOMoveY(gameObjectTransform.position.y, wallCollisionAnimationSpeed));
+        }
     }
 }

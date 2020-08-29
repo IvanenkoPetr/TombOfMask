@@ -8,34 +8,44 @@ public class SwipeMovement : MonoBehaviour
 {
     public LevelInfo[,] LevelStructure;
     Vector3 MovementDirection;
-    private float GameSpeed;
+    private float EnemySpeed;
     public MovementAxis MovementAxis;
     private Vector3 nextTileCoordinate;
     private Vector3 positionOnPreviousFrame;
+    public bool isStoped = false;
+    private float wallCollisionAnimationSpeed = 0.5f;
 
     // Start is called before the first frame update
     void Start()
     {
         positionOnPreviousFrame = transform.position;
-        GameSpeed = ConstractorUI.MainGame.GetComponent<Settings>().GameSpeed;
+        EnemySpeed = ConstractorUI.MainGame.GetComponent<Settings>().EnemySpeed;
         ChooseNextDirection(Vector3.zero);
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(MovementAxis == MovementAxis.None)
+        if(MovementAxis == MovementAxis.None || isStoped)
         {
             return;
         }
 
         var movementBeforeStop = MovementDirection;
-        MovementUtils.SetPosition(transform, ref MovementDirection, GameSpeed, positionOnPreviousFrame, LevelStructure);
-        positionOnPreviousFrame = transform.position;
-        if(MovementDirection == Vector3.zero)
+        var newPositionInfo = MovementUtils.GetPosition(transform, MovementDirection, EnemySpeed, positionOnPreviousFrame, LevelStructure);
+
+        if (newPositionInfo.nextTile?.TileType == TileType.Wall)
         {
+            MovementUtils.DoWallCollisionAnimation(MovementDirection, transform, wallCollisionAnimationSpeed);
             ChooseNextDirection(movementBeforeStop);
+
         }
+        else
+        {
+            transform.position = newPositionInfo.newPosition;
+        }
+
+        positionOnPreviousFrame = transform.position;
 
     }
 

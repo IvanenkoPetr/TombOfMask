@@ -13,6 +13,7 @@ public class Hatch : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        timeToSwitchState = ConstractorUI.MainGame.GetComponent<Settings>().TimeToSwitchHatchState;
         ChangeState();
     }
 

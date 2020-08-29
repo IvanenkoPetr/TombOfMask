@@ -5,7 +5,10 @@ using UnityEngine;
 public class Settings : MonoBehaviour
 {
     public float GameSpeed = 1f;
-    public bool IsCanChangeDirectionInMovement = false;
+    public float PlayerSpeed = 1f;
+    public float EnemySpeed = 1f;
+    public float TimeToSwitchHatchState = 1f;
+    public bool IsCanChangeDirectionInMovement = false; 
 
     // Start is called before the first frame update
     void Start()
@@ -17,6 +20,10 @@ public class Settings : MonoBehaviour
     private void RemoteSettings_Updated()
     {
         GameSpeed = RemoteSettings.GetFloat("GameSpeed", GameSpeed);
+        PlayerSpeed = RemoteSettings.GetFloat("PlayerSpeed", PlayerSpeed);
+        EnemySpeed = RemoteSettings.GetFloat("EnemySpeed", EnemySpeed);
+        TimeToSwitchHatchState = RemoteSettings.GetFloat("TimeToSwitchHatchState", TimeToSwitchHatchState);
+
         IsCanChangeDirectionInMovement = RemoteSettings.GetBool("IsCanChangeDirectionInMovement", IsCanChangeDirectionInMovement);
     }
 
