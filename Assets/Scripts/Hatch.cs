@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
@@ -10,6 +11,7 @@ public class Hatch : MonoBehaviour
     public float ChangeStateInSeconds;
     private float seconds;
     private float timeToSwitchState = 2f;
+    public event Action<GameObject> HatchChangeStateEvent;
     // Start is called before the first frame update
     void Start()
     {
@@ -29,6 +31,7 @@ public class Hatch : MonoBehaviour
         if (seconds >= timeToSwitchState)
         {
             ChangeState();
+            HatchChangeStateEvent(gameObject);
             seconds = 0f;
         }
     }

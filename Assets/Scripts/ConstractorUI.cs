@@ -54,7 +54,7 @@ public class ConstractorUI : MonoBehaviour
     public static GameObject SpikeLayerOnCanvas { get; set; }
     public static GameObject LevelElementsCanvas { get; set; }
     public static GameObject OpenElementsCanvasButton { get; set; }
-
+    public static GameObject SoundController { get; set; }
     public static Dictionary<TileType, Sprite> AccordanceTileTypeAndSprite { get; set; }
     public static Dictionary<SpikeType, Sprite> AccordanceSpikeTypeAndSprite { get; set; }
 
@@ -69,6 +69,7 @@ public class ConstractorUI : MonoBehaviour
         SpikeLayerOnCanvas = GameObject.Find("SpikesLayer");
         LevelElementsCanvas = GameObject.Find("LevelElementsMenu");
         OpenElementsCanvasButton = GameObject.Find("OpenElementsCanvasButton");
+        SoundController = GameObject.Find("SoundController");
 
         AccordanceTileTypeAndSprite = new Dictionary<TileType, Sprite>
         {
@@ -90,6 +91,8 @@ public class ConstractorUI : MonoBehaviour
             [SpikeType.Right] = RightSpikeSprite,
             [SpikeType.Left] = LeftSpikeSprite
         };
+
+        MainCamera.GetComponent<Camera>().orthographicSize = ConstractorUI.MainGame.GetComponent<Settings>().MainCameraSize;
 
         EditorCanvas.SetActive(true);
         MainGame.SetActive(false);

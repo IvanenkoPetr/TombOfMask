@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DG.Tweening;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,8 @@ public class SwipeMovement : MonoBehaviour
     private Vector3 positionOnPreviousFrame;
     public bool isStoped = false;
     private float wallCollisionAnimationSpeed = 0.5f;
+
+    public event Action<GameObject> WallCollisionEvent;
 
     // Start is called before the first frame update
     void Start()
@@ -36,7 +39,10 @@ public class SwipeMovement : MonoBehaviour
 
         if (newPositionInfo.nextTile?.TileType == TileType.Wall)
         {
-            MovementUtils.DoWallCollisionAnimation(MovementDirection, transform, wallCollisionAnimationSpeed);
+            isStoped = true;
+            var animationSequence = MovementUtils.DoWallCollisionAnimation(MovementDirection, transform, wallCollisionAnimationSpeed);
+            animationSequence[0].AppendCallback(() => isStoped = false);
+            WallCollisionEvent(gameObject);
             ChooseNextDirection(movementBeforeStop);
 
         }

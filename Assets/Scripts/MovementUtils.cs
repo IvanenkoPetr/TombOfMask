@@ -317,59 +317,62 @@ public static class MovementUtils
         return result;
     }
 
-    public static void DoWallCollisionAnimation(Vector3 movementDirection, Transform gameObjectTransform, float wallCollisionAnimationSpeed)
+    public static List<Sequence> DoWallCollisionAnimation(Vector3 movementDirection, Transform gameObjectTransform, float wallCollisionAnimationSpeed)
     {
-        var gameObject = gameObjectTransform.gameObject;
-        var player = gameObject.GetComponent<PlayerMovement>();
-        TweenCallback callback = null;
-        if (player != null)
-        {
-            player.isStoped = true;
-            callback = () => player.isStoped = false;
-        }
-        else
-        {
-            var enemy = gameObject.GetComponent<SwipeMovement>();
-            enemy.isStoped = true;
-            callback = () => enemy.isStoped = false;
-        }
+        var result = new List<Sequence>();
 
         if (movementDirection == Vector3.right)
         {
+            result.Add(
+                DOTween.Sequence().Append(gameObjectTransform.DOScaleX(0.75f, wallCollisionAnimationSpeed))
+                    .Append(gameObjectTransform.DOScaleX(1f, wallCollisionAnimationSpeed))
+                );
 
-            DOTween.Sequence().Append(gameObjectTransform.DOScaleX(0.75f, wallCollisionAnimationSpeed))
-                .Append(gameObjectTransform.DOScaleX(1f, wallCollisionAnimationSpeed)).AppendCallback(callback);
-
-            DOTween.Sequence().Append(gameObjectTransform.DOMoveX(gameObjectTransform.position.x + 0.125f, wallCollisionAnimationSpeed))
-                .Append(gameObjectTransform.DOMoveX(gameObjectTransform.position.x, wallCollisionAnimationSpeed));
+            result.Add(
+                DOTween.Sequence().Append(gameObjectTransform.DOMoveX(gameObjectTransform.position.x + 0.125f, wallCollisionAnimationSpeed))
+                    .Append(gameObjectTransform.DOMoveX(gameObjectTransform.position.x, wallCollisionAnimationSpeed))
+                );
 
         }
         else if (movementDirection == Vector3.left)
         {
-            DOTween.Sequence().Append(gameObjectTransform.DOScaleX(0.75f, wallCollisionAnimationSpeed))
-                .Append(gameObjectTransform.DOScaleX(1f, wallCollisionAnimationSpeed)).AppendCallback(callback);
+            result.Add(
+                DOTween.Sequence().Append(gameObjectTransform.DOScaleX(0.75f, wallCollisionAnimationSpeed))
+                    .Append(gameObjectTransform.DOScaleX(1f, wallCollisionAnimationSpeed))
+                );
 
-            DOTween.Sequence().Append(gameObjectTransform.DOMoveX(gameObjectTransform.position.x - 0.125f, wallCollisionAnimationSpeed))
-                .Append(gameObjectTransform.DOMoveX(gameObjectTransform.position.x, wallCollisionAnimationSpeed));
+            result.Add(
+                DOTween.Sequence().Append(gameObjectTransform.DOMoveX(gameObjectTransform.position.x - 0.125f, wallCollisionAnimationSpeed))
+                    .Append(gameObjectTransform.DOMoveX(gameObjectTransform.position.x, wallCollisionAnimationSpeed))
+                );
 
         }
         else if (movementDirection == Vector3.up)
         {
+            result.Add(
+                DOTween.Sequence().Append(gameObjectTransform.DOScaleY(0.75f, wallCollisionAnimationSpeed))
+                    .Append(gameObjectTransform.DOScaleY(1f, wallCollisionAnimationSpeed))
+                );
 
-            DOTween.Sequence().Append(gameObjectTransform.DOScaleY(0.75f, wallCollisionAnimationSpeed))
-                .Append(gameObjectTransform.DOScaleY(1f, wallCollisionAnimationSpeed)).AppendCallback(callback);
-
-            DOTween.Sequence().Append(gameObjectTransform.DOMoveY(gameObjectTransform.position.y + 0.125f, wallCollisionAnimationSpeed))
-                .Append(gameObjectTransform.DOMoveY(gameObjectTransform.position.y, wallCollisionAnimationSpeed));
+            result.Add(
+                DOTween.Sequence().Append(gameObjectTransform.DOMoveY(gameObjectTransform.position.y + 0.125f, wallCollisionAnimationSpeed))
+                    .Append(gameObjectTransform.DOMoveY(gameObjectTransform.position.y, wallCollisionAnimationSpeed))
+                );
 
         }
         else if (movementDirection == Vector3.down)
         {
-            DOTween.Sequence().Append(gameObjectTransform.DOScaleY(0.75f, wallCollisionAnimationSpeed))
-                .Append(gameObjectTransform.DOScaleY(1f, wallCollisionAnimationSpeed)).AppendCallback(callback);
+            result.Add(
+                DOTween.Sequence().Append(gameObjectTransform.DOScaleY(0.75f, wallCollisionAnimationSpeed))
+                    .Append(gameObjectTransform.DOScaleY(1f, wallCollisionAnimationSpeed))
+                );
 
-            DOTween.Sequence().Append(gameObjectTransform.DOMoveY(gameObjectTransform.position.y - 0.125f, wallCollisionAnimationSpeed))
-                .Append(gameObjectTransform.DOMoveY(gameObjectTransform.position.y, wallCollisionAnimationSpeed));
+            result.Add(
+                DOTween.Sequence().Append(gameObjectTransform.DOMoveY(gameObjectTransform.position.y - 0.125f, wallCollisionAnimationSpeed))
+                .Append(gameObjectTransform.DOMoveY(gameObjectTransform.position.y, wallCollisionAnimationSpeed))
+                );
         }
+
+        return result;
     }
 }

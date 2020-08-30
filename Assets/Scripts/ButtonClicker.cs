@@ -82,8 +82,10 @@ public class ButtonClicker : MonoBehaviour
     public void OnGenerateLevelButtonClick()
     {
         var mainGameObject = ConstractorUI.MainGame.transform;
-        var constractorObject = GameObject.Find("ConstractorUI").GetComponent<ConstractorUI>();
+        var constractorObject = ConstractorUI.UIConstractor.GetComponent<ConstractorUI>();
         var levelStructure = constractorObject.LevelStructure;
+
+        var soundController = ConstractorUI.SoundController.GetComponent<SoundController>();
 
         for (var i = 0; i < levelStructure.GetLength(0); i++)
         {
@@ -114,6 +116,7 @@ public class ButtonClicker : MonoBehaviour
                         gameObject.transform.position = new Vector3(i, j, 0);
                         var movement = gameObject.GetComponent<PlayerMovement>();
                         movement.LevelStructure = levelStructure;
+                        movement.WallCollisionEvent += soundController.PlayerWallCollisionEvent;
 
                         var mainCamera = ConstractorUI.MainCamera;
                         mainCamera.transform.SetParent(gameObject.transform);
@@ -122,13 +125,18 @@ public class ButtonClicker : MonoBehaviour
                     case TileType.Collectible:
                         gameObject = Instantiate(Collectible, mainGameObject);
                         gameObject.transform.position = new Vector3(i, j, 0);
+
+                        var collectible = gameObject.GetComponent<Collectible>();
+                        collectible.CollectibleCollisionEvent += soundController.CollectibleCollisionEvent;
                         break;
                     case TileType.Enemy:
                         gameObject = Instantiate(Enemy, mainGameObject);
-                        gameObject.transform.position = new Vector3(i, j, 0);
+                        gameObject.transform.position = new Vector3(i, j, 0);                        
+
                         var swipeMovement = gameObject.GetComponent<SwipeMovement>();
                         swipeMovement.LevelStructure = levelStructure;
                         swipeMovement.MovementAxis = MovementAxis.None;
+                        swipeMovement.WallCollisionEvent += soundController.EnemyWallCollisionEvent;
                         break;
                     case TileType.HorizontalEnemy:
                         gameObject = Instantiate(Enemy, mainGameObject);
@@ -136,6 +144,7 @@ public class ButtonClicker : MonoBehaviour
                         swipeMovement = gameObject.GetComponent<SwipeMovement>();
                         swipeMovement.LevelStructure = levelStructure;
                         swipeMovement.MovementAxis = MovementAxis.Horizontal;
+                        swipeMovement.WallCollisionEvent += soundController.EnemyWallCollisionEvent;
                         break;
                     case TileType.VerticalEnemy:
                         gameObject = Instantiate(Enemy, mainGameObject);
@@ -143,6 +152,7 @@ public class ButtonClicker : MonoBehaviour
                         swipeMovement = gameObject.GetComponent<SwipeMovement>();
                         swipeMovement.LevelStructure = levelStructure;
                         swipeMovement.MovementAxis = MovementAxis.Vertical;
+                        swipeMovement.WallCollisionEvent += soundController.EnemyWallCollisionEvent;
                         break;
                     case TileType.RandomEnemy:
                         gameObject = Instantiate(Enemy, mainGameObject);
@@ -156,7 +166,8 @@ public class ButtonClicker : MonoBehaviour
                         gameObject.transform.position = new Vector3(i, j, 0);
 
                         var hatchBehaviour = gameObject.GetComponent<Hatch>();
-                        hatchBehaviour.ChangeStateInSeconds = 1.0f;
+                        hatchBehaviour.ChangeStateInSeconds = ConstractorUI.MainGame.GetComponent<Settings>().TimeToSwitchHatchState;
+                        hatchBehaviour.HatchChangeStateEvent += soundController.HatchChangeStatusEvent;
                         break;
                 }
             }

@@ -8,6 +8,7 @@ public class Settings : MonoBehaviour
     public float PlayerSpeed = 1f;
     public float EnemySpeed = 1f;
     public float TimeToSwitchHatchState = 1f;
+    public float MainCameraSize = 1f;
     public bool IsCanChangeDirectionInMovement = false; 
 
     // Start is called before the first frame update
@@ -23,6 +24,7 @@ public class Settings : MonoBehaviour
         PlayerSpeed = RemoteSettings.GetFloat("PlayerSpeed", PlayerSpeed);
         EnemySpeed = RemoteSettings.GetFloat("EnemySpeed", EnemySpeed);
         TimeToSwitchHatchState = RemoteSettings.GetFloat("TimeToSwitchHatchState", TimeToSwitchHatchState);
+        MainCameraSize = RemoteSettings.GetFloat("MainCameraSize", MainCameraSize);
 
         IsCanChangeDirectionInMovement = RemoteSettings.GetBool("IsCanChangeDirectionInMovement", IsCanChangeDirectionInMovement);
     }
