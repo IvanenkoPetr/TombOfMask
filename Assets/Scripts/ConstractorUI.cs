@@ -46,6 +46,7 @@ public class ConstractorUI : MonoBehaviour
     public Sprite BottomSpikeSprite;
 
     public static GameObject EditorCanvas { get; set; }
+    public static GameObject EditorScrollView { get; set; }
     public static GameObject MainGame { get; set; }
     public static GameObject GameMenu{ get; set; }
     public static GameObject MainCamera { get; set; }
@@ -57,6 +58,8 @@ public class ConstractorUI : MonoBehaviour
     public static GameObject SoundController { get; set; }
     public static Dictionary<TileType, Sprite> AccordanceTileTypeAndSprite { get; set; }
     public static Dictionary<SpikeType, Sprite> AccordanceSpikeTypeAndSprite { get; set; }
+    public static List<GameObject> TilesPressedInTouch { get; set; } = new List<GameObject>();
+    public static bool IsEditorInSlideMode { get; set; } = false;
 
     void Start()
     {
@@ -70,6 +73,7 @@ public class ConstractorUI : MonoBehaviour
         LevelElementsCanvas = GameObject.Find("LevelElementsMenu");
         OpenElementsCanvasButton = GameObject.Find("OpenElementsCanvasButton");
         SoundController = GameObject.Find("SoundController");
+        EditorScrollView = GameObject.Find("EditorScrollView");
 
         AccordanceTileTypeAndSprite = new Dictionary<TileType, Sprite>
         {

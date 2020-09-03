@@ -11,10 +11,9 @@ public class SwipeMovement : MonoBehaviour
     Vector3 MovementDirection;
     private float EnemySpeed;
     public MovementAxis MovementAxis;
-    private Vector3 nextTileCoordinate;
     private Vector3 positionOnPreviousFrame;
     public bool isStoped = false;
-    private float wallCollisionAnimationSpeed = 0.5f;
+    private float wallCollisionAnimationSpeed = 0.2f;
 
     public event Action<GameObject> WallCollisionEvent;
 

@@ -11,13 +11,13 @@ public class PlayerMovement : MonoBehaviour
     Vector3 MovementDirection = Vector3.zero;
     private float PlayerSpeed;
     private bool IsCanChangeDirectionInMovement;
-    private LevelInfo turningPoint;
+    private Vector3 turningPoint = Vector3.zero;
     private Vector3 turningDirection;
     private Vector3 MovementDirectionUntilTurn;
     private Vector3 nextTileCoordinate;
     private Vector3 strartPosition;
     private Vector3 positionOnPreviousFrame;
-    private float wallCollisionAnimationSpeed = 0.5f;
+    private float wallCollisionAnimationSpeed = 0.2f;
     private List<Sequence> animationSequence = new List<Sequence>();
 
     public event Action<GameObject> WallCollisionEvent;
@@ -43,58 +43,179 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    private void MovementWithChangeDirection()
+    private void MovementWithChangeDirection1()
     {
-        LevelInfo nextTile = null;
-        var currentPosition = transform.position;
-
         var movementDirectionFromInput = SwipeDetector.GetDirectionFromSwipes();
         if (movementDirectionFromInput != Vector3.zero)
         {
+            if (animationSequence.Any())
+            {
+                animationSequence.ForEach(a => a.Kill());
+                animationSequence.Clear();
+
+                transform.localScale = Vector3.one;
+                transform.position = new Vector3(Mathf.Round(transform.position.x), Mathf.Round(transform.position.y), Mathf.Round(transform.position.z));
+            }
+
             if (MovementDirection == Vector3.zero)
             {
                 MovementDirection = movementDirectionFromInput;
             }
             else
             {
-                nextTile = MovementUtils.GetNextTile(currentPosition, MovementDirection, ref nextTileCoordinate, LevelStructure);
-                MovementDirectionUntilTurn = MovementDirection;
-                turningPoint = nextTile;
                 turningDirection = movementDirectionFromInput;
+                if (MovementDirection == Vector3.left)
+                {
+                    turningPoint = new Vector3(Mathf.Floor(transform.position.x), transform.position.y, transform.position.z);
+                }
+                else if (MovementDirection == Vector3.right)
+                {
+                    turningPoint = new Vector3(Mathf.Ceil(transform.position.x), transform.position.y, transform.position.z);
+                }
+                else if (MovementDirection == Vector3.down)
+                {
+                    turningPoint = new Vector3(transform.position.x, Mathf.Floor(transform.position.y), transform.position.z);
+                }
+                else if (MovementDirection == Vector3.up)
+                {
+                    turningPoint = new Vector3(transform.position.x, Mathf.Ceil(transform.position.y), transform.position.z);
+                }
             }
         }
 
-        if (turningPoint != null)
+        var newPositionInfo = MovementUtils.GetPosition(transform, MovementDirection, PlayerSpeed, positionOnPreviousFrame, LevelStructure);
+        transform.position = newPositionInfo.newPosition;
+        if (newPositionInfo.nextTile?.TileType == TileType.Wall)
         {
-            var distance = Math.Sqrt(Math.Pow((double)(currentPosition.x - turningPoint.x), 2.0) + Math.Pow((double)(currentPosition.y - turningPoint.y), 2.0));
-            if (distance <= 0.2)
+            if(turningDirection != Vector3.zero && MovementDirection != turningDirection)
             {
                 MovementDirection = turningDirection;
-                turningPoint = null;
-                turningDirection = Vector3.zero;
             }
-        }
+            else
+            {
+                
+                if (MovementUtils.CheckSpikesCollision(newPositionInfo.nextTile, MovementDirection))
+                {
+                    var camera = ConstractorUI.MainCamera;
+                    camera.transform.SetParent(null);
+                    Destroy(transform.gameObject);
+                }
+                else
+                {
+                    animationSequence = MovementUtils.DoWallCollisionAnimation(MovementDirection, transform, wallCollisionAnimationSpeed);
+                    animationSequence[0].AppendCallback(() => animationSequence.Clear());
 
-        nextTile = MovementUtils.GetNextTile(currentPosition, MovementDirection, ref nextTileCoordinate, LevelStructure);
-
-        if ((nextTile == null || nextTile.TileType != TileType.Wall) && MovementDirection != Vector3.zero)
-        {
-            transform.position = transform.position + MovementDirection * PlayerSpeed * Time.deltaTime;
+                    MovementDirection = Vector3.zero;
+                    WallCollisionEvent(gameObject);
+                    MovementDirection = Vector3.zero;
+                }
+                
+            }
+            
         }
         else
         {
-            MovementDirection = Vector3.zero;
-            transform.position = new Vector3((float)Math.Round(transform.position.x),
-                (float)Math.Round(transform.position.y), (float)Math.Round(transform.position.z));
+            if (turningPoint != Vector3.zero)
+            {
+                var makeTurn = false;
+                if (MovementDirection == Vector3.left)
+                {
+                    if(transform.position.x <= turningPoint.x)
+                    {
+                        makeTurn = true;
+                    }
+                }
+                else if (MovementDirection == Vector3.right)
+                {
+                    if (transform.position.x >= turningPoint.x )
+                    {
+                        makeTurn = true;
+                    }
+                }
+                else if (MovementDirection == Vector3.down)
+                {
+                    if (transform.position.y <= turningPoint.y)
+                    {
+                        makeTurn = true;
+                    }
+                }
+                else if (MovementDirection == Vector3.up)
+                {
+                    if (transform.position.y >= turningPoint.y)
+                    {
+                        makeTurn = true;
+                    }
+                }
+                if (makeTurn)
+                {
+                    transform.position = turningPoint;
+                    MovementDirection = turningDirection;
+                    turningPoint = Vector3.zero;
+                    turningDirection = Vector3.zero;
+                }
+            }
         }
+        positionOnPreviousFrame = transform.position;
+    }
+    
+    private void MovementWithChangeDirection()
+    {
+        var movementDirectionFromInput = SwipeDetector.GetDirectionFromSwipes();
+        if(movementDirectionFromInput != Vector3.zero)
+        {
+            if (MovementDirection != Vector3.zero)
+            {
+                transform.position = new Vector3(Mathf.Round(transform.position.x), Mathf.Round(transform.position.y), Mathf.Round(transform.position.z));
+            }
+            MovementDirection = movementDirectionFromInput;
+        }
+
+
+        if (MovementDirection == Vector3.zero)
+        {
+            return;
+        }
+
+        if (animationSequence.Any())
+        {
+            animationSequence.ForEach(a => a.Kill());
+            animationSequence.Clear();
+
+            transform.localScale = Vector3.one;
+            transform.position = new Vector3(Mathf.Round(transform.position.x), Mathf.Round(transform.position.y), Mathf.Round(transform.position.z));
+        }
+
+        var newPositionInfo = MovementUtils.GetPosition(transform, MovementDirection, PlayerSpeed, positionOnPreviousFrame, LevelStructure);
+
+        transform.position = newPositionInfo.newPosition;
+        if (newPositionInfo.nextTile?.TileType == TileType.Wall)
+        {
+            if (MovementUtils.CheckSpikesCollision(newPositionInfo.nextTile, MovementDirection))
+            {
+                var camera = ConstractorUI.MainCamera;
+                camera.transform.SetParent(null);
+                Destroy(transform.gameObject);
+            }
+            else
+            {
+
+                animationSequence = MovementUtils.DoWallCollisionAnimation(MovementDirection, transform, wallCollisionAnimationSpeed);
+                animationSequence[0].AppendCallback(() => animationSequence.Clear());
+
+                MovementDirection = Vector3.zero;
+                WallCollisionEvent(gameObject);
+            }
+        }
+
+        positionOnPreviousFrame = transform.position;
     }
 
     private void SimpleMovement()
     {
 
-        var movementDirectionFromInput = SwipeDetector.GetDirectionFromSwipes();
         if (MovementDirection == Vector3.zero)
         {
+            var movementDirectionFromInput = SwipeDetector.GetDirectionFromSwipes();
             MovementDirection = movementDirectionFromInput;
         }
 
@@ -113,7 +234,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         var newPositionInfo = MovementUtils.GetPosition(transform, MovementDirection, PlayerSpeed, positionOnPreviousFrame, LevelStructure);
-        
+
         transform.position = newPositionInfo.newPosition;
         if (newPositionInfo.nextTile?.TileType == TileType.Wall)
         {
@@ -128,12 +249,12 @@ public class PlayerMovement : MonoBehaviour
 
                 animationSequence = MovementUtils.DoWallCollisionAnimation(MovementDirection, transform, wallCollisionAnimationSpeed);
                 animationSequence[0].AppendCallback(() => animationSequence.Clear());
-                
+
                 MovementDirection = Vector3.zero;
                 WallCollisionEvent(gameObject);
             }
         }
 
         positionOnPreviousFrame = transform.position;
-    }  
+    }
 }

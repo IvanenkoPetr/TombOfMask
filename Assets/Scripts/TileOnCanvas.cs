@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -18,6 +19,11 @@ public class TileOnCanvas : MonoBehaviour
 
     public static void SetTileInfo(GameObject tileObject)
     {
+        if (ConstractorUI.TilesPressedInTouch.Any(a => a==tileObject))
+        {
+            return;
+        }
+
         var tileInfo = tileObject.GetComponent<LevelInfo>();
         var currentRectTransform = tileObject.GetComponent<RectTransform>();
 

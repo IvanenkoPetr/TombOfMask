@@ -60,6 +60,22 @@ public class ButtonClicker : MonoBehaviour
         ConstractorUI.LevelElementsCanvas.SetActive(true);
     }
 
+    public void OnSlideModeInEditorButtonClick()
+    {
+        ConstractorUI.IsEditorInSlideMode = !ConstractorUI.IsEditorInSlideMode;
+        ConstractorUI.EditorScrollView.GetComponent<ScrollRect>().enabled = !ConstractorUI.IsEditorInSlideMode;
+
+        var button = GameObject.Find("SlideModeInEditorButton");
+        if (ConstractorUI.IsEditorInSlideMode)
+        {
+            button.GetComponent<Image>().color = Color.yellow;
+        }
+        else
+        {
+            button.GetComponent<Image>().color = Color.white;
+        }
+    }
+
     public void OnSetLevelSizeButtonClick()
     {
         var newWidth = int.Parse(GameObject.Find("FieldWidthInputField").GetComponent<InputField>().text);
