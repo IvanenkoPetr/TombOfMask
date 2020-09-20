@@ -71,15 +71,17 @@ public static class MovementUtils
         return nextTile;
     }
 
-    public static (Vector3 newPosition, LevelInfo nextTile) GetPosition(Transform transform, Vector3 MovementDirection, float GameSpeed, Vector3 positionOnPreviousFrame, LevelInfo[,] LevelStructure)
+    public static (Vector3 newPosition, LevelInfo nextTile) GetPosition(Transform transform, Vector3 MovementDirection, float GameSpeed, Vector3 positionOnPreviousFrame)
     {
+        var levelStructure = Globals.LevelStructure;
+
         var positionAfterMovement = transform.position + MovementDirection * GameSpeed * Time.deltaTime;
         if (MovementDirection == Vector3.right)
         {
-            var strartPosition = new Vector3((float)Math.Truncate((double)positionOnPreviousFrame.x + 0.001), positionOnPreviousFrame.y, positionOnPreviousFrame.z);
+            var strartPosition = new Vector3((float)Math.Truncate((double)positionOnPreviousFrame.x + 0.001), Mathf.Round(positionOnPreviousFrame.y), positionOnPreviousFrame.z);
             while (strartPosition.x < positionAfterMovement.x)
             {
-                var tile = LevelStructure[(int)strartPosition.x + 1, (int)strartPosition.y];
+                var tile = levelStructure[(int)strartPosition.x + 1, (int)strartPosition.y];
                 var tileTipe = tile.TileType;
                 if (tileTipe == TileType.Wall)
                 {
@@ -92,10 +94,10 @@ public static class MovementUtils
         else if (MovementDirection == Vector3.left)
         {
 
-            var strartPosition = new Vector3((float)Math.Truncate((double)positionOnPreviousFrame.x - 0.001) + 1f, positionOnPreviousFrame.y, positionOnPreviousFrame.z);
+            var strartPosition = new Vector3((float)Math.Truncate((double)positionOnPreviousFrame.x - 0.001) + 1f, Mathf.Round(positionOnPreviousFrame.y), positionOnPreviousFrame.z);
             while (strartPosition.x > positionAfterMovement.x)
             {
-                var tile = LevelStructure[(int)strartPosition.x - 1, (int)strartPosition.y];
+                var tile = levelStructure[(int)strartPosition.x - 1, (int)strartPosition.y];
                 var tileTipe = tile.TileType;
                 if (tileTipe == TileType.Wall)
                 {
@@ -107,10 +109,10 @@ public static class MovementUtils
         }
         else if (MovementDirection == Vector3.up)
         {
-            var strartPosition = new Vector3(positionOnPreviousFrame.x, (float)Math.Truncate((double)positionOnPreviousFrame.y + 0.001f), positionOnPreviousFrame.z);
+            var strartPosition = new Vector3(Mathf.Round(positionOnPreviousFrame.x), (float)Math.Truncate((double)positionOnPreviousFrame.y + 0.001f), positionOnPreviousFrame.z);
             while (strartPosition.y < positionAfterMovement.y)
             {
-                var tile = LevelStructure[(int)strartPosition.x, (int)strartPosition.y + 1];
+                var tile = levelStructure[(int)strartPosition.x, (int)strartPosition.y + 1];
                 var tileTipe = tile.TileType;
                 if (tileTipe == TileType.Wall)
                 {
@@ -123,10 +125,10 @@ public static class MovementUtils
 
         else if (MovementDirection == Vector3.down)
         {
-            var strartPosition = new Vector3(positionOnPreviousFrame.x, (float)Math.Truncate((double)positionOnPreviousFrame.y - 0.001) + 1f, positionOnPreviousFrame.z);
+            var strartPosition = new Vector3(Mathf.Round(positionOnPreviousFrame.x), (float)Math.Truncate((double)positionOnPreviousFrame.y - 0.001) + 1f, positionOnPreviousFrame.z);
             while (strartPosition.y > positionAfterMovement.y)
             {
-                var tile = LevelStructure[(int)strartPosition.x, (int)strartPosition.y - 1];
+                var tile = levelStructure[(int)strartPosition.x, (int)strartPosition.y - 1];
                 var tileTipe = tile.TileType;
                 if (tileTipe == TileType.Wall)
                 {

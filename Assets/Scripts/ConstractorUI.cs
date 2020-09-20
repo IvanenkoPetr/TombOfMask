@@ -9,10 +9,7 @@ public class ConstractorUI : MonoBehaviour
 {
     // Start is called before the first frame update
     [SerializeField]
-    private GameObject TileButton;
-    [SerializeField]
     public GameObject SpikesButton;
-    public LevelInfo[,] LevelStructure;    
     public TileType CurrentTileType;
     public SpikeType CurrentSpikeType;
     public bool IsCurrentTypeTile;
@@ -20,7 +17,11 @@ public class ConstractorUI : MonoBehaviour
     [SerializeField]
     public Sprite EmptyTileSprite;
     [SerializeField]
-    public Sprite WallTileSprite;
+    public Sprite WallTileSprite; 
+    [SerializeField]
+    public Sprite StarTileSprite;
+    [SerializeField]
+    public Sprite ExitTileSprite;
     [SerializeField]
     public Sprite PlayerTileSprite;
     [SerializeField]
@@ -55,7 +56,6 @@ public class ConstractorUI : MonoBehaviour
     public static GameObject SpikeLayerOnCanvas { get; set; }
     public static GameObject LevelElementsCanvas { get; set; }
     public static GameObject OpenElementsCanvasButton { get; set; }
-    public static GameObject SoundController { get; set; }
     public static Dictionary<TileType, Sprite> AccordanceTileTypeAndSprite { get; set; }
     public static Dictionary<SpikeType, Sprite> AccordanceSpikeTypeAndSprite { get; set; }
     public static List<GameObject> TilesPressedInTouch { get; set; } = new List<GameObject>();
@@ -63,16 +63,17 @@ public class ConstractorUI : MonoBehaviour
 
     void Start()
     {
+        Globals.IsEditorScene = true;
+
         EditorCanvas = GameObject.Find("MainMenu");
         MainGame = GameObject.Find("MainGame");
         GameMenu = GameObject.Find("GameMenu");
-        MainCamera = GameObject.Find("MainCamera");
+        //MainCamera = GameObject.Find("MainCamera");
         UIConstractor = GameObject.Find("ConstractorUI");
         MainLayerOnCanvas = GameObject.Find("MainLayer");
         SpikeLayerOnCanvas = GameObject.Find("SpikesLayer");
         LevelElementsCanvas = GameObject.Find("LevelElementsMenu");
         OpenElementsCanvasButton = GameObject.Find("OpenElementsCanvasButton");
-        SoundController = GameObject.Find("SoundController");
         EditorScrollView = GameObject.Find("EditorScrollView");
 
         AccordanceTileTypeAndSprite = new Dictionary<TileType, Sprite>
@@ -86,6 +87,8 @@ public class ConstractorUI : MonoBehaviour
             [TileType.Hatch] = HatchTileSprite,
             [TileType.Player] = PlayerTileSprite,
             [TileType.Wall] = WallTileSprite,
+            [TileType.Star] = StarTileSprite,
+            [TileType.Exit] = ExitTileSprite,
         };
 
         AccordanceSpikeTypeAndSprite = new Dictionary<SpikeType, Sprite>
@@ -96,19 +99,21 @@ public class ConstractorUI : MonoBehaviour
             [SpikeType.Left] = LeftSpikeSprite
         };
 
-        MainCamera.GetComponent<Camera>().orthographicSize = ConstractorUI.MainGame.GetComponent<Settings>().MainCameraSize;
+
 
         EditorCanvas.SetActive(true);
         MainGame.SetActive(false);
         LevelElementsCanvas.SetActive(false);
         GameMenu.SetActive(false);
+        GameplaySettings.MainCamera = GameObject.Find("Camera");
+        //var settings = GameplaySettings.Settings;
 
         InstantiateLevelField();
     }
 
     public void InstantiateLevelField(int widthInBlocks, int heightInBlocks)
     {
-        var wallBlockRectTransform = TileButton.GetComponent<RectTransform>();
+        var wallBlockRectTransform = EditorPrefabsSettings.Prefabs.TileButton.GetComponent<RectTransform>();
         var blockWidth = wallBlockRectTransform.rect.width;
         var blockHight = wallBlockRectTransform.rect.height;
 
@@ -133,7 +138,7 @@ public class ConstractorUI : MonoBehaviour
         var parentOfContent = ContentTransform.parent.gameObject.GetComponent<RectTransform>();
         parentOfContent.sizeDelta = new Vector2(canvasRectTransform.rect.width, canvasRectTransform.rect.height);
 
-        var wallBlockRectTransform = TileButton.GetComponent<RectTransform>();
+        var wallBlockRectTransform = EditorPrefabsSettings.Prefabs.TileButton.GetComponent<RectTransform>();
         var blockWidth = wallBlockRectTransform.rect.width;
         var blockHight = wallBlockRectTransform.rect.height;
 
@@ -147,7 +152,7 @@ public class ConstractorUI : MonoBehaviour
             var verticalList = new List<LevelInfo>();
             for (float y = 50; y <= canvasHight-50; y = y + blockHight)
             {
-                var gameObject = Instantiate(TileButton, ContentTransform);
+                var gameObject = Instantiate(EditorPrefabsSettings.Prefabs.TileButton, ContentTransform);
                 var RectTransform = gameObject.GetComponent<RectTransform>();
                 RectTransform.anchoredPosition = new Vector2(x, y);
 
@@ -165,17 +170,19 @@ public class ConstractorUI : MonoBehaviour
             LevelStructureList.Add(verticalList);
         }
 
-        LevelStructure = new LevelInfo[LevelStructureList.Count, LevelStructureList[0].Count];
+        var levelStructure = new LevelInfo[LevelStructureList.Count, LevelStructureList[0].Count];
         i = 0;
         foreach (var row in LevelStructureList)
         {
             j = 0;
             foreach (var column in row)
             {
-                LevelStructure[i, j] = column;
+                levelStructure[i, j] = column;
                 j++;
             }
             i++;
         }
+
+        Globals.SetLevelStructure(levelStructure);
     }
 }

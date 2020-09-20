@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
@@ -12,17 +9,6 @@ using UnityEngine.UI;
 
 public class ButtonClicker : MonoBehaviour
 {
-    public GameObject Wall;
-    public GameObject Player;
-    public GameObject Enemy;
-    public GameObject Collectible;
-    public GameObject Hatch;
-
-    private void Update()
-    {
-
-    }
-
     public void OnTileButtonClick(string tileType)
     {
         var UIConstractor = ConstractorUI.UIConstractor;
@@ -88,6 +74,13 @@ public class ButtonClicker : MonoBehaviour
         };
         children.ForEach(child => Destroy(child));
 
+        children = new List<GameObject>();
+        foreach (Transform child in ConstractorUI.SpikeLayerOnCanvas.transform)
+        {
+            children.Add(child.gameObject);
+        };
+        children.ForEach(child => Destroy(child));
+
         ConstractorUI.UIConstractor.GetComponent<ConstractorUI>().InstantiateLevelField(newWidth, newHeight);
 
         ConstractorUI.EditorCanvas.SetActive(true);
@@ -98,96 +91,9 @@ public class ButtonClicker : MonoBehaviour
     public void OnGenerateLevelButtonClick()
     {
         var mainGameObject = ConstractorUI.MainGame.transform;
-        var constractorObject = ConstractorUI.UIConstractor.GetComponent<ConstractorUI>();
-        var levelStructure = constractorObject.LevelStructure;
+        //var constractorObject = ConstractorUI.UIConstractor.GetComponent<ConstractorUI>();
 
-        var soundController = ConstractorUI.SoundController.GetComponent<SoundController>();
-
-        for (var i = 0; i < levelStructure.GetLength(0); i++)
-        {
-            for (var j = 0; j < levelStructure.GetLength(1); j++)
-            {
-                var tileInfo = levelStructure[i, j];
-                var tileType = tileInfo.TileType;
-                switch (tileType)
-                {
-                    case TileType.Wall:
-
-                        var gameObject = Instantiate(Wall, mainGameObject);
-                        gameObject.transform.position = new Vector3(i, j, 0);
-                        if (tileInfo.Options != null)
-                        {
-                            var spikeLayer = gameObject.transform.Find("SpikesLayer").gameObject;
-                            spikeLayer.SetActive(true);
-                            var spikesInfo = (Dictionary<SpikeType,bool>)tileInfo.Options;
-                            foreach(var spike in spikesInfo)
-                            {
-                                spikeLayer.transform.Find(spike.Key.ToString()).gameObject.SetActive(spike.Value);
-                            }
-                        }
-
-                        break;
-                    case TileType.Player:
-                        gameObject = Instantiate(Player, mainGameObject);
-                        gameObject.transform.position = new Vector3(i, j, 0);
-                        var movement = gameObject.GetComponent<PlayerMovement>();
-                        movement.LevelStructure = levelStructure;
-                        movement.WallCollisionEvent += soundController.PlayerWallCollisionEvent;
-
-                        var mainCamera = ConstractorUI.MainCamera;
-                        mainCamera.transform.SetParent(gameObject.transform);
-                        mainCamera.transform.localPosition = new Vector3(0, 0, mainCamera.transform.position.z);
-                        break;
-                    case TileType.Collectible:
-                        gameObject = Instantiate(Collectible, mainGameObject);
-                        gameObject.transform.position = new Vector3(i, j, 0);
-
-                        var collectible = gameObject.GetComponent<Collectible>();
-                        collectible.CollectibleCollisionEvent += soundController.CollectibleCollisionEvent;
-                        break;
-                    case TileType.Enemy:
-                        gameObject = Instantiate(Enemy, mainGameObject);
-                        gameObject.transform.position = new Vector3(i, j, 0);                        
-
-                        var swipeMovement = gameObject.GetComponent<SwipeMovement>();
-                        swipeMovement.LevelStructure = levelStructure;
-                        swipeMovement.MovementAxis = MovementAxis.None;
-                        swipeMovement.WallCollisionEvent += soundController.EnemyWallCollisionEvent;
-                        break;
-                    case TileType.HorizontalEnemy:
-                        gameObject = Instantiate(Enemy, mainGameObject);
-                        gameObject.transform.position = new Vector3(i, j, 0);
-                        swipeMovement = gameObject.GetComponent<SwipeMovement>();
-                        swipeMovement.LevelStructure = levelStructure;
-                        swipeMovement.MovementAxis = MovementAxis.Horizontal;
-                        swipeMovement.WallCollisionEvent += soundController.EnemyWallCollisionEvent;
-                        break;
-                    case TileType.VerticalEnemy:
-                        gameObject = Instantiate(Enemy, mainGameObject);
-                        gameObject.transform.position = new Vector3(i, j, 0);
-                        swipeMovement = gameObject.GetComponent<SwipeMovement>();
-                        swipeMovement.LevelStructure = levelStructure;
-                        swipeMovement.MovementAxis = MovementAxis.Vertical;
-                        swipeMovement.WallCollisionEvent += soundController.EnemyWallCollisionEvent;
-                        break;
-                    case TileType.RandomEnemy:
-                        gameObject = Instantiate(Enemy, mainGameObject);
-                        gameObject.transform.position = new Vector3(i, j, 0);
-                        swipeMovement = gameObject.GetComponent<SwipeMovement>();
-                        swipeMovement.LevelStructure = levelStructure;
-                        swipeMovement.MovementAxis = MovementAxis.Random;
-                        break;
-                    case TileType.Hatch:
-                        gameObject = Instantiate(Hatch, mainGameObject);
-                        gameObject.transform.position = new Vector3(i, j, 0);
-
-                        var hatchBehaviour = gameObject.GetComponent<Hatch>();
-                        hatchBehaviour.ChangeStateInSeconds = ConstractorUI.MainGame.GetComponent<Settings>().TimeToSwitchHatchState;
-                        hatchBehaviour.HatchChangeStateEvent += soundController.HatchChangeStatusEvent;
-                        break;
-                }
-            }
-        }
+        Globals.GenerateLevel(mainGameObject, GameplaySettings.MainCamera);
 
         var canvas = ConstractorUI.EditorCanvas;
         canvas.SetActive(false);
@@ -202,12 +108,12 @@ public class ButtonClicker : MonoBehaviour
 
     public void OnLoadLevelFromText()
     {
-        var constractorObject = GameObject.Find("ConstractorUI").GetComponent<ConstractorUI>();
+        var constractorObject = ConstractorUI.UIConstractor.GetComponent<ConstractorUI>();
 
         var levelStructureInText = Resources.Load<TextAsset>("LevelStructure").text;
         DeserializeLevelStructure(levelStructureInText);
 
-        var levelStructure = constractorObject.LevelStructure;
+        var levelStructure = Globals.LevelStructure;
         var allTiles = ConstractorUI.MainLayerOnCanvas.transform;
         foreach (Transform tile in allTiles)
         {
@@ -219,8 +125,8 @@ public class ButtonClicker : MonoBehaviour
 
     public void OnSaveLevelIntoText()
     {
-        var constractorObject = GameObject.Find("ConstractorUI").GetComponent<ConstractorUI>();
-        var levelStructure = constractorObject.LevelStructure;
+        var constractorObject =ConstractorUI.UIConstractor.GetComponent<ConstractorUI>();
+        var levelStructure = Globals.LevelStructure;
         var levelInText = SerializeLevelStructure(levelStructure);
         var folder = Application.persistentDataPath;
         folder = @"C:\temp";
@@ -264,7 +170,7 @@ public class ButtonClicker : MonoBehaviour
             var levelStructureFromText = (List<List<LevelInfoDto>>)serializer.Deserialize(reader);
 
             ConstractorUI.UIConstractor.GetComponent<ConstractorUI>().InstantiateLevelField(levelStructureFromText.Count, levelStructureFromText[0].Count);
-            var levelStructure = ConstractorUI.UIConstractor.GetComponent<ConstractorUI>().LevelStructure;
+            var levelStructure = Globals.LevelStructure;
             for (var i = 0; i < levelStructureFromText.Count; i++)
             {
                 for (var j = 0; j < levelStructureFromText[0].Count; j++)

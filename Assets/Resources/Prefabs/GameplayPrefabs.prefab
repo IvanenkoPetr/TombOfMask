@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2492864073140000958
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1145472481565848655}
+  - component: {fileID: 5385006277919719788}
+  m_Layer: 0
+  m_Name: GameplayPrefabs
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1145472481565848655
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2492864073140000958}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5385006277919719788
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2492864073140000958}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 207c8a8c03bd6f743ba11184c12cac5d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Wall: {fileID: 3564353160823571424, guid: e900e4477927f624d94d75f13274268b, type: 3}
+  Player: {fileID: 1238172728970944023, guid: 348f32bbaf926d847b68c134e15e8c7a, type: 3}
+  Enemy: {fileID: 8361544025604784938, guid: 2ddd714f4c003c84c9efefde295c1ae5, type: 3}
+  Collectible: {fileID: 8938407526922933299, guid: 7d898b4d3d091994bba22b5b86b3c1af,
+    type: 3}
+  Hatch: {fileID: 8423889115213933310, guid: cdcb8f4ae4b35fc40aaf8a840af03632, type: 3}
+  Star: {fileID: 5773472471227886461, guid: f93633a5f9f46b1458d04ae231a1747c, type: 3}
+  Exit: {fileID: 96740717466995710, guid: 6b0ebf3f67490eb4a966693a284683b6, type: 3}
+  SoundController: {fileID: 9192048093154319536, guid: f90fbd5244f0e334d8fd4a214866e0cf,
+    type: 3}
+  MainCamera: {fileID: 3178048115198671084, guid: 0ae952f556cf2274da74a1171dafebc4,
+    type: 3}
+  Settings: {fileID: 3246813832106130074, guid: 5e2e76388b80783438d9fa3653ee82b4,
+    type: 3}

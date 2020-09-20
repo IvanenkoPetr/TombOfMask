@@ -7,14 +7,20 @@ public class GameButtons : MonoBehaviour
     // Start is called before the first frame update
     public void OnToEditorClick()
     {
-        ConstractorUI.MainCamera.transform.SetParent(null);
+        ClearGameScene();
+
+    }
+
+    public static void ClearGameScene()
+    {
+        GameplaySettings.MainCamera.transform.SetParent(null);
         var mainGame = ConstractorUI.MainGame;
         foreach (Transform child in mainGame.transform)
         {
-            if(child.GetComponent<Canvas>() == null)
+            if (child.GetComponent<Canvas>() == null)
             {
                 Destroy(child.gameObject);
-            }           
+            }
         }
 
         var canvas = ConstractorUI.EditorCanvas; ;
@@ -24,6 +30,5 @@ public class GameButtons : MonoBehaviour
 
         var gameMenu = ConstractorUI.GameMenu;
         gameMenu.SetActive(false);
-
     }
 }

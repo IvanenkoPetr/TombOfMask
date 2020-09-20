@@ -24,12 +24,9 @@ public class TileOnCanvas : MonoBehaviour
             return;
         }
 
-        var tileInfo = tileObject.GetComponent<LevelInfo>();
         var currentRectTransform = tileObject.GetComponent<RectTransform>();
-
         var constractorObject =ConstractorUI.UIConstractor.GetComponent<ConstractorUI>();
-        var tile = constractorObject.LevelStructure[tileInfo.x, tileInfo.y];
-
+        var tile = tileObject.GetComponent<LevelInfo>();
         if (constractorObject.IsCurrentTypeTile)
         {
             tile.TileType = constractorObject.CurrentTileType;

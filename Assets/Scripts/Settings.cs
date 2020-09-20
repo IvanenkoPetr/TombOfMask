@@ -15,7 +15,8 @@ public class Settings : MonoBehaviour
     void Start()
     {
         RemoteSettings_Updated();
-        RemoteSettings.Updated += RemoteSettings_Updated;
+        //RemoteSettings.Updated += RemoteSettings_Updated;
+        //Debug.Log("Settings");
     }
 
     private void RemoteSettings_Updated()
@@ -27,11 +28,19 @@ public class Settings : MonoBehaviour
         MainCameraSize = RemoteSettings.GetFloat("MainCameraSize", MainCameraSize);
 
         IsCanChangeDirectionInMovement = RemoteSettings.GetBool("IsCanChangeDirectionInMovement", IsCanChangeDirectionInMovement);
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
+        var gamesRemoteSettings = new GamesRemoteSettings()
+        {
+            EnemySpeed = EnemySpeed,
+            GameSpeed = GameSpeed,
+            IsCanChangeDirectionInMovement = IsCanChangeDirectionInMovement,
+            MainCameraSize = MainCameraSize,
+            PlayerSpeed = PlayerSpeed,
+            TimeToSwitchHatchState = TimeToSwitchHatchState
+        };
+
+        SavingGlobalSettings.Settings.RemoteSettings = gamesRemoteSettings;
+        SavingGlobalSettings.SaveGameData();
+     }
 }

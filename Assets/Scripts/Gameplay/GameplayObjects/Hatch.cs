@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class Hatch : MonoBehaviour
@@ -15,15 +16,10 @@ public class Hatch : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        timeToSwitchState = ConstractorUI.MainGame.GetComponent<Settings>().TimeToSwitchHatchState;
+        timeToSwitchState = SavingGlobalSettings.Settings.RemoteSettings.TimeToSwitchHatchState;
         ChangeState();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
 
     void FixedUpdate()
     {
@@ -41,11 +37,21 @@ public class Hatch : MonoBehaviour
         var player = other.GetComponent<PlayerMovement>();
         if (player != null)
         {
-            if(CurrentState == HatchState.Opened)
-            { 
-            var camera = ConstractorUI.MainCamera;
-            camera.transform.SetParent(null);
-            Destroy(other.gameObject);
+            if (Globals.IsEditorScene)
+            {
+                if (CurrentState == HatchState.Opened)
+                {
+                    var camera = GameplaySettings.MainCamera;
+                    camera.transform.SetParent(null);
+                    Destroy(other.gameObject);
+                }
+            }
+            else
+            {
+                if (CurrentState == HatchState.Opened)
+                {
+                    SceneManager.LoadScene(Globals.LevelSelectionSceneName);
+                }                
             }
         }
     }

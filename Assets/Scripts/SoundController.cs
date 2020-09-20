@@ -16,17 +16,8 @@ public class SoundController : MonoBehaviour
     [SerializeField]
     public AudioClip HatchChangeStatusSound;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
+    [SerializeField]
+    public AudioClip StarCollisionSound;
 
     public void PlayerWallCollisionEvent(GameObject player)
     {
@@ -50,6 +41,13 @@ public class SoundController : MonoBehaviour
  
     }
 
+    public void StarCollisionEvent(GameObject collectible)
+    {
+        var audioSource = gameObject.GetComponent<AudioSource>();
+        audioSource.PlayOneShot(StarCollisionSound);
+
+    }
+
     public void HatchChangeStatusEvent(GameObject hatch)
     {
         if (IsOnScreenPlusOneCell(hatch.transform.position))
@@ -64,7 +62,8 @@ public class SoundController : MonoBehaviour
     {
         get
         {
-            return Camera.main.orthographicSize * Camera.main.aspect + 1;
+            return GameplaySettings.MainCamera.GetComponent<Camera>().orthographicSize 
+                * GameplaySettings.MainCamera.GetComponent<Camera>().aspect + 1;
         }
     }
 
@@ -72,13 +71,13 @@ public class SoundController : MonoBehaviour
     {
         get
         {
-            return Camera.main.orthographicSize + 1;
+            return GameplaySettings.MainCamera.GetComponent<Camera>().orthographicSize + 1;
         }
     }
 
     private bool IsOnScreenPlusOneCell(Vector3 position)
     {
-        return (Mathf.Abs(Camera.main.transform.position.x - position.x) <= DynamicHorizontalScreenBorderPlusOneCell &&
-                Mathf.Abs(Camera.main.transform.position.y - position.y) <= DynamicVerticalScreenBorderDistancePlusOneCell);
+        return (Mathf.Abs(GameplaySettings.MainCamera.transform.position.x - position.x) <= DynamicHorizontalScreenBorderPlusOneCell &&
+                Mathf.Abs(GameplaySettings.MainCamera.transform.position.y - position.y) <= DynamicVerticalScreenBorderDistancePlusOneCell);
     }
 }

@@ -7,7 +7,6 @@ using UnityEngine;
 
 public class SwipeMovement : MonoBehaviour
 {
-    public LevelInfo[,] LevelStructure;
     Vector3 MovementDirection;
     private float EnemySpeed;
     public MovementAxis MovementAxis;
@@ -21,7 +20,7 @@ public class SwipeMovement : MonoBehaviour
     void Start()
     {
         positionOnPreviousFrame = transform.position;
-        EnemySpeed = ConstractorUI.MainGame.GetComponent<Settings>().EnemySpeed;
+        EnemySpeed = SavingGlobalSettings.Settings.RemoteSettings.EnemySpeed;
         ChooseNextDirection(Vector3.zero);
     }
 
@@ -34,7 +33,7 @@ public class SwipeMovement : MonoBehaviour
         }
 
         var movementBeforeStop = MovementDirection;
-        var newPositionInfo = MovementUtils.GetPosition(transform, MovementDirection, EnemySpeed, positionOnPreviousFrame, LevelStructure);
+        var newPositionInfo = MovementUtils.GetPosition(transform, MovementDirection, EnemySpeed, positionOnPreviousFrame);
 
         if (newPositionInfo.nextTile?.TileType == TileType.Wall)
         {
@@ -80,8 +79,8 @@ public class SwipeMovement : MonoBehaviour
         }else if (MovementAxis == MovementAxis.Random)
         {
             var currentPosition = transform.position;
-            var x = (int)currentPosition.x;
-            var y = (int)currentPosition.y;
+            var x = Mathf.RoundToInt(currentPosition.x);
+            var y = Mathf.RoundToInt(currentPosition.y); ;
 
             var allDirection = new[] {
                 new { x = x - 1, y, direction = Vector3.left },
@@ -94,7 +93,7 @@ public class SwipeMovement : MonoBehaviour
             {
                 try
                 {
-                    var tileInfo = LevelStructure[elem.direction.x, elem.direction.y];
+                    var tileInfo = Globals.LevelStructure[elem.direction.x, elem.direction.y];
                     if (tileInfo.TileType != TileType.Wall)
                     {
                         possibleDirection.Add(elem.index);

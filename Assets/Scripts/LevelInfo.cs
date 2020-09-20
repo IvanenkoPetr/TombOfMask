@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public class LevelInfo:MonoBehaviour
+//public class LevelInfo:MonoBehaviour
+public class LevelInfo : MonoBehaviour
 {
     public int x { get; set; }
     public int y { get; set; }
@@ -70,7 +71,9 @@ public enum TileType
     VerticalEnemy,
     RandomEnemy,
     Collectible,
-    Hatch
+    Hatch,
+    Star,
+    Exit
 }
 
 [Serializable]
