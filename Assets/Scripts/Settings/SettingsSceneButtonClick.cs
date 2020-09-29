@@ -6,7 +6,6 @@ using UnityEngine.UI;
 
 public class SettingsSceneButtonClick : MonoBehaviour
 {
-    const string MainMenuScene = "Scenes/MainMenu";
 
     private GameObject soundVolumeSlider;
     void Start()
@@ -18,7 +17,7 @@ public class SettingsSceneButtonClick : MonoBehaviour
 
     public void OnCancelButtonClick()
     {
-        SceneManager.LoadScene(MainMenuScene);
+        SceneManager.LoadScene(Globals.MainMenuSceneName);
 
     }
 
@@ -26,7 +25,7 @@ public class SettingsSceneButtonClick : MonoBehaviour
     {
         var slider = soundVolumeSlider.GetComponent<Slider>();
         SavingGlobalSettings.Settings.GameSettings.SoundVolume = slider.value;
-        SceneManager.LoadScene(MainMenuScene);
+        SceneManager.LoadScene(Globals.MainMenuSceneName);
 
     }
 }

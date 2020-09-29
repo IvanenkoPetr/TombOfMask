@@ -6,6 +6,8 @@ public static class Globals
     public const string LevelSelectionSceneName = "Scenes/LevelSelectionScene";
     public const string EditorSceneName = "Scenes/EditorScene";
     public const string SettingsSceneName = "Scenes/SettingsScene";
+    public const string MainMenuSceneName = "Scenes/MainMenu";
+    public const string GameplaySceneName = "Scenes/GameplayScene";
 
     private static LevelInfo[,] levelStructure;
     public static LevelInfo[,] LevelStructure => levelStructure;

@@ -3,12 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class LevelSelectionButtons : MonoBehaviour
+public class LevelSelectionButtonInfo : MonoBehaviour
 {
-    public void OnLevelButtonClick(string level)
+    public int Level { get; set; }
+
+    public void OnLevelButtonClick()
     {
-        var newLevelStructure = ResourcesManagment.LoadLevelStructure($"Levels/Level{level}Structure");
+        var newLevelStructure = ResourcesManagment.LoadLevelStructure($"Levels/Level{Level}Structure");
         Globals.SetLevelStructure(newLevelStructure);
         SceneManager.LoadScene(Globals.GameplaySceneName);
     }
+
+
 }

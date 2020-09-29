@@ -5,6 +5,7 @@ using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class ButtonClicker : MonoBehaviour
@@ -62,24 +63,17 @@ public class ButtonClicker : MonoBehaviour
         }
     }
 
+    public void OnToMainMenuButtonClick()
+    {
+        SceneManager.LoadScene(Globals.MainMenuSceneName);
+    }
+
     public void OnSetLevelSizeButtonClick()
     {
         var newWidth = int.Parse(GameObject.Find("FieldWidthInputField").GetComponent<InputField>().text);
         var newHeight = int.Parse(GameObject.Find("FieldHeightInputField").GetComponent<InputField>().text);
 
-        var children = new List<GameObject>();
-        foreach (Transform child in ConstractorUI.MainLayerOnCanvas.transform)
-        {
-            children.Add(child.gameObject);
-        };
-        children.ForEach(child => Destroy(child));
-
-        children = new List<GameObject>();
-        foreach (Transform child in ConstractorUI.SpikeLayerOnCanvas.transform)
-        {
-            children.Add(child.gameObject);
-        };
-        children.ForEach(child => Destroy(child));
+        DestroyCanvasObjects();
 
         ConstractorUI.UIConstractor.GetComponent<ConstractorUI>().InstantiateLevelField(newWidth, newHeight);
 
