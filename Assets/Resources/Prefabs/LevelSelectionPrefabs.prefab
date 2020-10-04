@@ -45,3 +45,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   LevelButton: {fileID: 3260417147265869305, guid: f000683e6dc827e43a7b6a7437cbee8a,
     type: 3}
+  LevelLine: {fileID: 186126446850091199, guid: 6b1c58ef409545040a6d4a08fe5ede9b,
+    type: 3}

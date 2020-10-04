@@ -5,6 +5,7 @@ using UnityEngine;
 public class LevelSelectionPrefabs : MonoBehaviour
 {
     public GameObject LevelButton;
+    public GameObject LevelLine;
 }
 
 
