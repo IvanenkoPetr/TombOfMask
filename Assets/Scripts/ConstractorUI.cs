@@ -47,10 +47,12 @@ public class ConstractorUI : MonoBehaviour
     public Sprite BottomSpikeSprite;
 
     public static GameObject EditorCanvas { get; set; }
+    public static GameObject LevelGenerationMenu { get; set; }
     public static GameObject EditorScrollView { get; set; }
     public static GameObject MainGame { get; set; }
     public static GameObject GameMenu{ get; set; }
     public static GameObject MainCamera { get; set; }
+    public static GameObject Content { get; set; }
     public static GameObject UIConstractor { get; set; }
     public static GameObject MainLayerOnCanvas { get; set; }
     public static GameObject SpikeLayerOnCanvas { get; set; }
@@ -63,6 +65,7 @@ public class ConstractorUI : MonoBehaviour
 
     void Start()
     {
+        
         Globals.IsEditorScene = true;
 
         EditorCanvas = GameObject.Find("MainMenu");
@@ -75,8 +78,10 @@ public class ConstractorUI : MonoBehaviour
         LevelElementsCanvas = GameObject.Find("LevelElementsMenu");
         OpenElementsCanvasButton = GameObject.Find("OpenElementsCanvasButton");
         EditorScrollView = GameObject.Find("EditorScrollView");
+        LevelGenerationMenu = GameObject.Find("LevelGenerationMenu");
+        Content = GameObject.Find("Content"); 
 
-        AccordanceTileTypeAndSprite = new Dictionary<TileType, Sprite>
+         AccordanceTileTypeAndSprite = new Dictionary<TileType, Sprite>
         {
             [TileType.Collectible] = CollectibleTileSprite,
             [TileType.Empty] = EmptyTileSprite,
@@ -105,6 +110,7 @@ public class ConstractorUI : MonoBehaviour
         MainGame.SetActive(false);
         LevelElementsCanvas.SetActive(false);
         GameMenu.SetActive(false);
+        LevelGenerationMenu.SetActive(false);
         GameplaySettings.MainCamera = GameObject.Find("Camera");
         //var settings = GameplaySettings.Settings;
 

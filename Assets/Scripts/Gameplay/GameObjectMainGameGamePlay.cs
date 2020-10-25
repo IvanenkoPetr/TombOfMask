@@ -9,11 +9,11 @@ public class GameObjectMainGameGamePlay : MonoBehaviour
     void Start()
     {
         var settings = GameplaySettings.Settings;
-        var emptyObject = GameObject.Find("MainGame");
+        var mainGame = GameObject.Find("MainGame");
         GameplaySettings.MainCamera = GameObject.Find("MainCamera");
         GameplaySettings.PointsText = GameObject.Find("PointsText");
         GameplaySettings.StarsText = GameObject.Find("StarsText"); 
-        Globals.GenerateLevel(emptyObject.transform, GameplaySettings.MainCamera);
+        Globals.GenerateLevel(mainGame.transform, GameplaySettings.MainCamera);
 
         ProgressController.PaintHUD();
     }
