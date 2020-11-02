@@ -19,6 +19,12 @@ public class SoundController : MonoBehaviour
     [SerializeField]
     public AudioClip StarCollisionSound;
 
+    void Start()
+    {
+        var audio = gameObject.GetComponent<AudioSource>();
+        audio.volume = SavingGlobalSettings.Settings.GameSettings.SoundVolume;
+    }
+
     public void PlayerWallCollisionEvent(GameObject player)
     {
         var audioSource = player.GetComponent<AudioSource>();

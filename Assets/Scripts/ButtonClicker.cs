@@ -1,4 +1,5 @@
-﻿using Edgar.GraphBasedGenerator.Grid2D;
+﻿using AStar;
+using Edgar.GraphBasedGenerator.Grid2D;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,7 +13,8 @@ using UnityEngine.UI;
 
 public class ButtonClicker : MonoBehaviour
 {
-
+    //private const int ObstaclesCoefficient = 15;
+    //private const int squareForInnerroom = 30; 
     public void OnRandomLevelMenuButtonClick()
     {
         ConstractorUI.EditorCanvas.SetActive(false);
@@ -22,31 +24,71 @@ public class ButtonClicker : MonoBehaviour
 
     public void OnGenerateRandomLevelButtonClick()
     {
-        var Xoffset = 50;
-        var Yoffset = 50;
-        DestroyCanvasObjects();
-
-        ConstractorUI.UIConstractor.GetComponent<ConstractorUI>().InstantiateLevelField(100, 100);
-        var levelStructure = Globals.LevelStructure;
         var numberOfRooms = int.Parse(GameObject.Find("NumberOfRoomsInputField").GetComponent<InputField>().text);
-        var roomsWight = int.Parse(GameObject.Find("RoomWidthInputField").GetComponent<InputField>().text);
-        var roomsHeight = int.Parse(GameObject.Find("RoomHeightInputField").GetComponent<InputField>().text);
+        var roomsMaxWight = int.Parse(GameObject.Find("RoomMaxWidthInputField").GetComponent<InputField>().text);
+        var roomsMaxHeight = int.Parse(GameObject.Find("RoomMaxHeightInputField").GetComponent<InputField>().text);
+        var roomsMinWight = int.Parse(GameObject.Find("RoomMinWidthInputField").GetComponent<InputField>().text);
+        var roomsMinHeight = int.Parse(GameObject.Find("RoomMinHeightInputField").GetComponent<InputField>().text);
 
-        var layout = GenerateLevel.Generate(numberOfRooms, roomsWight, roomsHeight);
-
-        GenerateRooms(Xoffset, Yoffset, levelStructure, layout);
-        GenerateDoors(Xoffset, Yoffset, levelStructure, layout);
-        GenerateItems(Xoffset, Yoffset, levelStructure, layout);
-
-        DrawLevel(Xoffset, Yoffset, levelStructure);
+        GenerateRandomLevel(numberOfRooms, roomsMaxWight, roomsMaxHeight, roomsMinWight, roomsMinHeight);
 
         ConstractorUI.EditorCanvas.SetActive(true);
         ConstractorUI.MainGame.SetActive(true);
         ConstractorUI.LevelGenerationMenu.SetActive(false);
     }
 
-    private void GenerateItems(int xoffset, int yoffset, LevelInfo[,] levelStructure, LayoutGrid2D<int> layout)
+    private void GenerateRandomLevel(int numberOfRooms, int roomsMaxWight, int roomsMaxHeight, int roomsMinWight, int roomsMinHeight)
     {
+        var numberOfAttempts = 3;
+        var i = 0;
+        while (i < numberOfAttempts)
+        {
+            DestroyCanvasObjects();
+
+            var layout = GenerateLevel.Generate(numberOfRooms, roomsMinWight, roomsMaxWight, roomsMinHeight, roomsMaxHeight);
+            var minX = layout.Rooms.Min(a=> a.Position.X);
+            var maxX = layout.Rooms.Max(a => a.Position.X);
+            var minY = layout.Rooms.Min(a => a.Position.Y);
+            var maxY = layout.Rooms.Max(a => a.Position.Y);
+            var maxRoomSide = Mathf.Max(roomsMaxWight, roomsMaxHeight, roomsMinWight, roomsMinHeight);
+
+            var sizeX = maxX - minX + maxRoomSide * 2;
+            var sizeY = maxY - minY + maxRoomSide * 2;
+
+            //int canvasDimension = (int)(Math.Max(roomsMaxHeight, roomsMaxWight) * numberOfRooms * 2 * 1.5);
+
+            //var Xoffset = canvasDimension / 2;
+            //var Yoffset = canvasDimension / 2;
+
+            var Xoffset = -minX + 3;
+            var Yoffset = -minY + 3;
+
+            ConstractorUI.UIConstractor.GetComponent<ConstractorUI>().InstantiateLevelField(sizeX, sizeY);
+
+            var levelStructure = Globals.LevelStructure;
+            GenerateRooms(Xoffset, Yoffset, levelStructure, layout);
+            GenerateDoors(Xoffset, Yoffset, levelStructure, layout);
+            var isLevelPassable = GenerateItems(Xoffset, Yoffset, levelStructure, layout);
+            if (isLevelPassable)
+            {
+                DrawLevel(Xoffset, Yoffset, levelStructure);
+                return;
+            }
+
+            roomsMaxWight++;
+            roomsMaxHeight++;
+            roomsMinWight++;
+            roomsMinHeight++;
+            i++;
+        }
+
+
+    }
+
+    private bool GenerateItems(int xoffset, int yoffset, LevelInfo[,] levelStructure, LayoutGrid2D<int> layout)
+    {
+
+        var occupiedPoints = new List<AStar.Point>();
         var firstRoom = layout.Rooms[0];
         var lastRoom = layout.Rooms[layout.Rooms.Count - 1];
 
@@ -58,14 +100,56 @@ public class ButtonClicker : MonoBehaviour
         var endPoint = levelStructure[xoffset + lastRoom.Position.X + 1, yoffset + lastRoom.Position.Y + indent];
         endPoint.TileType = TileType.Exit;
 
-        GenerateEnemies(xoffset, yoffset, levelStructure, layout, indent);
+        var numberOfAttempts = 5;
+        var i = 0;
+        var obstaclesCoefficient = 15;
+        var squareForInnerRoom = 30;
+        while (i < numberOfAttempts)
+        {
+            foreach (var point in occupiedPoints)
+            {
+                var tile = levelStructure[point.X, point.Y];
+                tile.TileType = TileType.Empty;
+            }
+
+            occupiedPoints.Clear();
+            obstaclesCoefficient += i * 5;
+            squareForInnerRoom += i * 10;
+
+            GenerateObstacles(xoffset, yoffset, levelStructure, layout, indent, occupiedPoints, obstaclesCoefficient);
+            GenerateInnerWalls(xoffset, yoffset, levelStructure, layout, occupiedPoints, squareForInnerRoom);
+            GenerateEnemies(xoffset, yoffset, levelStructure, layout, indent, occupiedPoints);
+            GenerateCollectible(xoffset, yoffset, levelStructure, layout, occupiedPoints);
+
+            Debug.Log(AStar.PathFinder.IsLevelPassable());
+
+            if (AStar.PathFinder.IsLevelPassable())
+            {
+                return true;
+            }
+
+            i++;
+        }
+        return false;
+
+    }
+
+    private static void GenerateCollectible(int xoffset, int yoffset, LevelInfo[,] levelStructure, LayoutGrid2D<int> layout, List<AStar.Point> occupiedPoints)
+    {
+        var firstRoom = layout.Rooms[0];
+        var lastRoom = layout.Rooms[layout.Rooms.Count - 1];
 
         System.Random rnd = new System.Random();
         var isHorizontal = rnd.Next(0, 1);
-       // var isHorizontal = 0;
+        // var isHorizontal = 0;
         foreach (var room in layout.Rooms)
         {
             if (room.IsCorridor)
+            {
+                continue;
+            }
+
+            if (room == firstRoom || room == lastRoom)
             {
                 continue;
             }
@@ -135,12 +219,13 @@ public class ButtonClicker : MonoBehaviour
                     YEndPoint--;
                 };
 
-                while(YStarPoint <= YEndPoint)
+                while (YStarPoint <= YEndPoint)
                 {
                     var tile = levelStructure[xoffset + room.Position.X + rowX, yoffset + room.Position.Y + YStarPoint];
                     if (tile.TileType == TileType.Empty)
                     {
                         tile.TileType = TileType.Collectible;
+                        occupiedPoints.Add(new Point(tile.x, tile.y));
 
                     }
 
@@ -149,18 +234,150 @@ public class ButtonClicker : MonoBehaviour
 
             }
         }
-
-
     }
-
-    private static int GenerateEnemies(int xoffset, int yoffset, LevelInfo[,] levelStructure, LayoutGrid2D<int> layout, int indent)
+    private static void GenerateInnerWalls(int xoffset, int yoffset, LevelInfo[,] levelStructure, LayoutGrid2D<int> layout, List<AStar.Point> occupiedPoints, int squareForInnerRoom)
     {
+        var firstRoom = layout.Rooms[0];
+        var lastRoom = layout.Rooms[layout.Rooms.Count - 1];
+        System.Random rnd = new System.Random();
+
+        // var isHorizontal = 0;
+        foreach (var room in layout.Rooms)
+        {
+            if (room.IsCorridor)
+            {
+                continue;
+            }
+
+            if (room.Square < squareForInnerRoom)
+            {
+                continue;
+            }
+
+            var points = room.Outline.GetPoints();
+            var maxX = points.Max(a => a.X);
+            var minX = points.Min(a => a.X);
+            var maxY = points.Max(a => a.Y);
+            var minY = points.Min(a => a.Y);
+
+
+            var isHorizontal = (rnd.Next(100) > 50);
+            var wallLength = Mathf.RoundToInt(rnd.Next(200, 300) / 100.0f);
+            wallLength = 2;
+
+            if (isHorizontal)
+            {
+                var rowY = rnd.Next(minY, maxY);
+
+                if (rowY == 0)
+                {
+                    if (room.Transformation == Edgar.Geometry.TransformationGrid2D.Identity)
+                    {
+                        rowY++;
+                    }
+                    else
+                    {
+                        rowY--;
+                    }
+                }
+                else if (Math.Abs(rowY) == Math.Abs(maxY) || Math.Abs(rowY) == Math.Abs(minY))
+                {
+                    if (room.Transformation == Edgar.Geometry.TransformationGrid2D.Identity)
+                    {
+                        rowY--;
+                    }
+                    else
+                    {
+                        rowY++;
+                    }
+                }
+
+                var X = 0;
+                var isStartFromTheEnd = (rnd.Next(100) > 50);
+
+                if (isStartFromTheEnd)
+                {
+                    X = maxX - wallLength;
+                }
+                else
+                {
+                    X = 1;
+                    maxX = X + wallLength;
+                }
+
+                while (X <= maxX - 1)
+                {
+                    var tile = levelStructure[xoffset + room.Position.X + X, yoffset + room.Position.Y + rowY];
+                    if (tile.TileType == TileType.Empty)
+                    {
+                        tile.TileType = TileType.Wall;
+
+                    }
+                    X++;
+                }
+            }
+            else
+            {
+                var rowX = rnd.Next(minX, maxX);
+
+                rowX = rowX == 0 ? 1 : rowX;
+                rowX = rowX == maxX ? maxX - 1 : rowX;
+
+                var YStarPoint = minY;
+                var YEndPoint = maxY;
+                if (room.Transformation == Edgar.Geometry.TransformationGrid2D.Identity)
+                {
+                    YStarPoint++;
+                    YEndPoint--;
+                }
+                else
+                {
+                    YStarPoint++;
+                    YEndPoint--;
+                };
+
+                var isStartFromTheEnd = (rnd.Next(100) > 50);
+
+                if (isStartFromTheEnd)
+                {
+                    YStarPoint = YEndPoint - wallLength + 1;
+                }
+                else
+                {
+                    YEndPoint = YStarPoint + wallLength - 1;
+                }
+
+                while (YStarPoint <= YEndPoint)
+                {
+                    var tile = levelStructure[xoffset + room.Position.X + rowX, yoffset + room.Position.Y + YStarPoint];
+                    if (tile.TileType == TileType.Empty)
+                    {
+                        tile.TileType = TileType.Wall;
+                        occupiedPoints.Add(new Point(tile.x, tile.y));
+
+                    }
+
+                    YStarPoint++;
+                }
+            }
+        }
+    }
+    private static void GenerateEnemies(int xoffset, int yoffset, LevelInfo[,] levelStructure, LayoutGrid2D<int> layout, int indent, List<AStar.Point> occupiedPoints)
+    {
+        var firstRoom = layout.Rooms[0];
+        var lastRoom = layout.Rooms[layout.Rooms.Count - 1];
+
         System.Random rnd = new System.Random();
         var enemyType = new[] { TileType.Enemy, TileType.HorizontalEnemy, TileType.VerticalEnemy, TileType.RandomEnemy };
 
         foreach (var room in layout.Rooms)
         {
             if (room.IsCorridor)
+            {
+                continue;
+            }
+
+            if (room == firstRoom || room == lastRoom)
             {
                 continue;
             }
@@ -212,12 +429,80 @@ public class ButtonClicker : MonoBehaviour
                 {
                     tile.TileType = enemyType[rnd.Next(0, 3)];
                     i++;
+                    occupiedPoints.Add(new Point(tile.x, tile.y));
                 }
 
             }
         }
+    }
 
-        return indent;
+    private static void GenerateObstacles(int xoffset, int yoffset, LevelInfo[,] levelStructure, LayoutGrid2D<int> layout, int indent, List<AStar.Point> occupiedPoints, int obstaclesCoefficient)
+    {
+        var firstRoom = layout.Rooms[0];
+        var lastRoom = layout.Rooms[layout.Rooms.Count - 1];
+
+        System.Random rnd = new System.Random();
+        var enemyType = new[] { TileType.Enemy, TileType.HorizontalEnemy, TileType.VerticalEnemy, TileType.RandomEnemy };
+
+        foreach (var room in layout.Rooms)
+        {
+            if (room.IsCorridor)
+            {
+                continue;
+            }
+
+            var numberOfObstacles = room.Square / obstaclesCoefficient;
+            var i = 1;
+            while (i <= numberOfObstacles)
+            {
+                indent = room.Transformation == Edgar.Geometry.TransformationGrid2D.Identity ? 1 : -1;
+
+                var points = room.Outline.GetPoints();
+                var maxX = points.Max(a => a.X);
+                var minX = points.Min(a => a.X);
+                var maxY = points.Max(a => a.Y);
+                var minY = points.Min(a => a.Y);
+
+
+                var obstaclesX = rnd.Next(minX, maxX);
+                var obstaclesY = rnd.Next(minY, maxY);
+
+                obstaclesX = obstaclesX == 0 ? 1 : obstaclesX;
+                obstaclesX = obstaclesX == maxX ? maxX - 1 : obstaclesX;
+
+                if (obstaclesY == 0)
+                {
+                    if (room.Transformation == Edgar.Geometry.TransformationGrid2D.Identity)
+                    {
+                        obstaclesY++;
+                    }
+                    else
+                    {
+                        obstaclesY--;
+                    }
+                }
+                else if (Math.Abs(obstaclesY) == Math.Abs(maxY) || Math.Abs(obstaclesY) == Math.Abs(minY))
+                {
+                    if (room.Transformation == Edgar.Geometry.TransformationGrid2D.Identity)
+                    {
+                        obstaclesY--;
+                    }
+                    else
+                    {
+                        obstaclesY++;
+                    }
+                }
+
+                var tile = levelStructure[xoffset + room.Position.X + obstaclesX, yoffset + room.Position.Y + obstaclesY];
+                if (tile.TileType == TileType.Empty)
+                {
+                    tile.TileType = TileType.Wall;
+                    i++;
+                    occupiedPoints.Add(new Point(tile.x, tile.y));
+                }
+
+            }
+        }
     }
 
     private static void DrawLevel(int Xoffset, int Yoffset, LevelInfo[,] levelStructure)
@@ -233,7 +518,15 @@ public class ButtonClicker : MonoBehaviour
         foreach (Transform tile in allTiles)
         {
             var tileLevelInfo = tile.gameObject.GetComponent<LevelInfo>();
-            TileOnCanvas.SetTileColour(tile.gameObject, levelStructure[tileLevelInfo.x, tileLevelInfo.y].TileType);
+            try
+            {
+                TileOnCanvas.SetTileType(tile.gameObject, levelStructure[tileLevelInfo.x, tileLevelInfo.y].TileType);
+            }
+            catch
+            {
+                Debug.Log($"x={tileLevelInfo.x}, y={tileLevelInfo.y}");
+            }
+           
         }
     }
 
@@ -311,6 +604,14 @@ public class ButtonClicker : MonoBehaviour
                     var maxY = Mathf.Max(currentPoint.Y, nextPoint.Y);
                     while (minY <= maxY)
                     {
+                        try
+                        {
+                            var tile1 = levelStructure[Xoffset + room.Position.X + currentPoint.X, Yoffset + room.Position.Y + minY];
+                        }
+                        catch
+                        {
+                            var q = 1;
+                        }
                         var tile = levelStructure[Xoffset + room.Position.X + currentPoint.X, Yoffset + room.Position.Y + minY];
                         tile.TileType = TileType.Wall;
                         var spikes = new Dictionary<SpikeType, bool>()
@@ -332,6 +633,15 @@ public class ButtonClicker : MonoBehaviour
                     var maxX = Mathf.Max(currentPoint.X, nextPoint.X);
                     while (minX <= maxX)
                     {
+                        try
+                        {
+                            var tile1 = levelStructure[Xoffset + minX + room.Position.X, Yoffset + currentPoint.Y + room.Position.Y];
+                        }
+                        catch
+                        {
+
+                            var q = 1;
+                        }
                         var tile = levelStructure[Xoffset + minX + room.Position.X, Yoffset + currentPoint.Y + room.Position.Y];
                         tile.TileType = TileType.Wall;
                         var spikes = new Dictionary<SpikeType, bool>()
@@ -449,7 +759,7 @@ public class ButtonClicker : MonoBehaviour
         {
             var tileLevelInfo = tile.gameObject.GetComponent<LevelInfo>();
             var infoInLevelStructure = levelStructure[tileLevelInfo.x, tileLevelInfo.y];
-            TileOnCanvas.SetTileColour(tile.gameObject, infoInLevelStructure.TileType);
+            TileOnCanvas.SetTileType(tile.gameObject, infoInLevelStructure.TileType);
 
             if (infoInLevelStructure.Options != null)
             {

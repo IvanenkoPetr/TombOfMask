@@ -62,6 +62,8 @@ namespace Edgar.GraphBasedGenerator.Grid2D
         /// </remarks>
         public TransformationGrid2D Transformation { get; }
 
+        public int Square => (Math.Abs(Outline.GetPoints()[2].X * Outline.GetPoints()[2].Y));
+
         /// <param name="room">See the <see cref="Room"/> property.</param>
         /// <param name="outline">See the <see cref="Outline"/> property.</param>
         /// <param name="position">See the <see cref="Position"/> property.</param>
@@ -80,5 +82,6 @@ namespace Edgar.GraphBasedGenerator.Grid2D
             RoomDescription = roomDescription;
         }
 
+        
     }
 }

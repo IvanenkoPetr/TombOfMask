@@ -114,7 +114,7 @@ public class ConstractorUI : MonoBehaviour
         GameplaySettings.MainCamera = GameObject.Find("Camera");
         //var settings = GameplaySettings.Settings;
 
-        InstantiateLevelField();
+        InstantiateLevelField(10, 10);
     }
 
     public void InstantiateLevelField(int widthInBlocks, int heightInBlocks)

@@ -30,7 +30,7 @@ public class TileOnCanvas : MonoBehaviour
         if (constractorObject.IsCurrentTypeTile)
         {
             tile.TileType = constractorObject.CurrentTileType;
-            SetTileColour(tileObject, constractorObject.CurrentTileType);
+            SetTileType(tileObject, constractorObject.CurrentTileType);
             if(constractorObject.CurrentTileType == TileType.Wall)
             {
                 var spikes = new Dictionary<SpikeType, bool>()
@@ -81,7 +81,7 @@ public class TileOnCanvas : MonoBehaviour
         }
     }
 
-    public static void SetTileColour(GameObject tileObject, TileType currentTileType)
+    public static void SetTileType(GameObject tileObject, TileType currentTileType)
     {
         var image = tileObject.GetComponent<Image>();
         image.sprite = ConstractorUI.AccordanceTileTypeAndSprite[currentTileType];

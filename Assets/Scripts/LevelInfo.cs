@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 
@@ -12,6 +13,24 @@ public class LevelInfo : MonoBehaviour
     public TileType TileType { get; set; }
     public object Options { get; set; }
 
+    public bool IsPassable
+    {
+        get
+        {
+            var passable = new[]
+            {
+                TileType.Empty,
+                TileType.Player,
+                TileType.Collectible,
+                TileType.Hatch,
+                TileType.Star,
+                TileType.Exit
+            };
+
+            return passable.Any(a => a == TileType);
+        }
+    }
+
     public LevelInfoDto ToDTOObject()
     {
         var result = new LevelInfoDto()
@@ -21,11 +40,11 @@ public class LevelInfo : MonoBehaviour
             TileType = TileType
         };
 
-        if(TileType == TileType.Wall)
+        if (TileType == TileType.Wall)
         {
             var wallOptions = (Dictionary<SpikeType, bool>)Options;
             var dtoOptions = new List<SpikesOnWallDto>();
-            foreach(var spike in wallOptions)
+            foreach (var spike in wallOptions)
             {
                 var spikeDto = new SpikesOnWallDto()
                 {

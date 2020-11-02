@@ -7,7 +7,8 @@ using UnityEngine;
 
 public static class GenerateLevel
 {
-    public static LayoutGrid2D<int> Generate(int numberOfRooms, int roomWidth, int roomHeight)
+
+    public static LayoutGrid2D<int> Generate(int numberOfRooms, int roomMinWidth, int roomMaxWidth, int roomMinHeight, int roomMaxHeight)
     {
         try
         {
@@ -16,7 +17,7 @@ public static class GenerateLevel
         }
         catch
         {
-            var levelGenerator = new LevelLayoutGenerator(numberOfRooms, roomWidth, roomHeight);
+            var levelGenerator = new LevelLayoutGenerator(numberOfRooms, roomMinWidth, roomMaxWidth, roomMinHeight, roomMaxHeight);
             var layout = levelGenerator.Run();
             layout.SaveToJson(@"c:\temp\layout.json");
 
@@ -29,14 +30,20 @@ public static class GenerateLevel
 public class LevelLayoutGenerator
 {
     private int numberOfRooms;
-    private int roomWidth;
-    private int roomHeight;
+    private int roomMinWidth;
+    private int roomMaxWidth;
+    private int roomMinHeight;
+    private int roomMaxHeight;
 
-    public LevelLayoutGenerator(int numberOfRooms, int roomWidth, int roomHeight)
+    private const int maxAttemptsToGenerateLevel = 5;
+
+    public LevelLayoutGenerator(int numberOfRooms, int roomMinWidth, int roomMaxWidth, int roomMinHeight, int roomMaxHeight)
     {
         this.numberOfRooms = numberOfRooms;
-        this.roomWidth = roomWidth;
-        this.roomHeight = roomHeight;
+        this.roomMinWidth = roomMinWidth;
+        this.roomMaxWidth = roomMaxWidth;
+        this.roomMinHeight = roomMinHeight;
+        this.roomMaxHeight = roomMaxHeight;
     }
 
     /// <summary>
@@ -45,6 +52,7 @@ public class LevelLayoutGenerator
     public LevelDescriptionGrid2D<int> GetLevelDescription()
     {
         RoomDescriptionGrid2D roomDescription = GetRoomDescription();
+        RoomDescriptionGrid2D startEndRoomDescription = GetStartEndRoomDescription();
         RoomDescriptionGrid2D corridorRoomDescription = GetCorridorDescription();
 
         var levelDescription = new LevelDescriptionGrid2D<int>();
@@ -52,12 +60,21 @@ public class LevelLayoutGenerator
         var i = 0;
         while (i < numberOfRooms * 2)
         {
-
-            levelDescription.AddRoom(i, roomDescription);
-            if (i != 0)
+            if (i == 0)
             {
+                levelDescription.AddRoom(i, startEndRoomDescription);
+            }
+            else if(i == numberOfRooms * 2 - 2)
+            {
+                levelDescription.AddRoom(i, startEndRoomDescription);
                 levelDescription.AddConnection(i - 1, i);
             }
+            else
+            {
+                levelDescription.AddRoom(i, roomDescription);
+                levelDescription.AddConnection(i - 1, i);
+            }            
+
             i++;
 
             if (i != numberOfRooms * 2 - 1)
@@ -67,25 +84,7 @@ public class LevelLayoutGenerator
             }
 
             i++;
-        }
-        //levelDescription.AddRoom(0, roomDescription);
-        //levelDescription.AddRoom(1, corridorRoomDescription);
-        //levelDescription.AddRoom(2, roomDescription);
-        //levelDescription.AddRoom(3, corridorRoomDescription);
-        //levelDescription.AddRoom(4, roomDescription);
-        //levelDescription.AddRoom(5, corridorRoomDescription);
-        //levelDescription.AddRoom(6, roomDescription);
-        //levelDescription.AddRoom(7, corridorRoomDescription);
-        //levelDescription.AddRoom(8, roomDescription);
-
-        //levelDescription.AddConnection(0, 1);
-        //levelDescription.AddConnection(1, 2);
-        //levelDescription.AddConnection(2, 3);
-        //levelDescription.AddConnection(3, 4);
-        //levelDescription.AddConnection(4, 5);
-        //levelDescription.AddConnection(5, 6);
-        //levelDescription.AddConnection(6, 7);
-        //levelDescription.AddConnection(7, 8);
+        }    
 
         return levelDescription;
     }
@@ -148,19 +147,43 @@ public class LevelLayoutGenerator
         for (var i = 0; i <= numberOfRooms; i++)
         {
             var roomTemplate = new RoomTemplateGrid2D(
-                PolygonGrid2D.GetRectangle(rnd.Next(4, roomWidth), rnd.Next(4, roomHeight)),
+                PolygonGrid2D.GetRectangle(rnd.Next(roomMinWidth, roomMaxWidth), rnd.Next(roomMinHeight, roomMaxHeight)),
                 doors,
                 allowedTransformations: transformations);
 
             roomsTemplates.Add(roomTemplate);
         }
 
-        var squareRoomTemplate = new RoomTemplateGrid2D(
-            PolygonGrid2D.GetSquare(8),
-            doors
+        var roomDescription = new RoomDescriptionGrid2D
+        (
+            isCorridor: false,
+            roomTemplates: roomsTemplates
         );
 
-        roomsTemplates.Add(squareRoomTemplate);
+        return roomDescription;
+    }
+
+    private RoomDescriptionGrid2D GetStartEndRoomDescription()
+    {
+        var roomsTemplates = new List<RoomTemplateGrid2D>();
+        var doors = new SimpleDoorModeGrid2D(doorLength: 1, cornerDistance: 2);
+        System.Random rnd = new System.Random();
+
+        var transformations = new List<TransformationGrid2D>()
+            {
+                TransformationGrid2D.Identity,
+                TransformationGrid2D.Rotate90
+            };
+
+   
+            var roomTemplate = new RoomTemplateGrid2D(
+                PolygonGrid2D.GetRectangle(roomMinWidth, roomMinHeight),
+                doors,
+                allowedTransformations: transformations);
+
+            roomsTemplates.Add(roomTemplate);       
+
+
         var roomDescription = new RoomDescriptionGrid2D
         (
             isCorridor: false,
@@ -175,9 +198,28 @@ public class LevelLayoutGenerator
     /// </summary>
     public LayoutGrid2D<int> Run()
     {
+        LayoutGrid2D<int> layout = null;
+        
         var levelDescription = GetLevelDescription();
         var generator = new GraphBasedGeneratorGrid2D<int>(levelDescription);
-        var layout = generator.GenerateLayout();
+        var i = 0;
+        while (i < maxAttemptsToGenerateLevel)
+        { 
+            try
+            {
+                layout = generator.GenerateLayout();
+                break;
+            }
+            catch
+            {
+                i++;
+                if(i>= maxAttemptsToGenerateLevel)
+                {
+                    throw;
+                }
+            }
+        }
+
 
         return layout;
 
