@@ -13,6 +13,8 @@ public class LevelInfo : MonoBehaviour
     public TileType TileType { get; set; }
     public object Options { get; set; }
 
+    public bool IsActive { get; set; }
+
     public bool IsPassable
     {
         get
@@ -25,6 +27,28 @@ public class LevelInfo : MonoBehaviour
                 TileType.Hatch,
                 TileType.Star,
                 TileType.Exit
+            };
+
+            return passable.Any(a => a == TileType);
+        }
+    }
+
+    public bool IsPassableForEnemy
+    {
+        get
+        {
+            var passable = new[]
+            {
+                TileType.Empty,
+                TileType.Player,
+                TileType.Collectible,
+                TileType.Hatch,
+                TileType.Star,
+                TileType.Exit,
+                TileType.Enemy,
+                TileType.HorizontalEnemy,
+                TileType.VerticalEnemy,
+                TileType.RandomEnemy
             };
 
             return passable.Any(a => a == TileType);

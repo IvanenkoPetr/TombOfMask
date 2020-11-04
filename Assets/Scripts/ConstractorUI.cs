@@ -166,6 +166,7 @@ public class ConstractorUI : MonoBehaviour
                 levelInfo.x = i;
                 levelInfo.y = j;
                 levelInfo.TileType = TileType.Empty;
+                levelInfo.IsActive = true;
                 verticalList.Add(levelInfo);
 
                 var image = gameObject.GetComponent<Image>();

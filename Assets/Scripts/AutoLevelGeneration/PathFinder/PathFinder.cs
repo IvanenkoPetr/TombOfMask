@@ -49,6 +49,49 @@ namespace AStar
             return (path != null);
         }
 
+        public static bool IsPlayerAndEnimiesConnected()
+        {
+            var levelStructure = Globals.LevelStructure;
+
+            var playerPoint = new Point();
+            var enimiesPoints = new List<Point>();
+
+            var pathGrid = new byte[levelStructure.GetLength(0), levelStructure.GetLength(1)];
+            for (var i = 0; i < levelStructure.GetLength(0); i++)
+            {
+                for (var j = 0; j < levelStructure.GetLength(1); j++)
+                {
+                    var tile = levelStructure[i, j];
+                    pathGrid[i, j] = (byte)(tile.IsPassableForEnemy ? 1 : 0);
+
+                    if (tile.TileType == TileType.Player)
+                    {
+                        playerPoint = new Point(i, j);
+                    }
+                    if (tile.TileType == TileType.Enemy || 
+                        tile.TileType == TileType.HorizontalEnemy
+                        || tile.TileType == TileType.VerticalEnemy
+                        || tile.TileType == TileType.RandomEnemy)
+                    {
+                        enimiesPoints.Add(new Point(i, j));
+                    }
+                }
+            }
+
+            var allEnimiesConnected = true;
+            var pathFinder = new PathFinder(pathGrid);
+            foreach (var enemyPoint in enimiesPoints)
+            {
+                var path = pathFinder.FindPath(playerPoint, enemyPoint);
+                if(path is null)
+                {
+                    allEnimiesConnected = false;
+                    break;
+                }
+            }            
+
+            return allEnimiesConnected;
+        }
         public PathFinder(byte[,] grid, PathFinderOptions pathFinderOptions = null)
         {
             if (grid == null)

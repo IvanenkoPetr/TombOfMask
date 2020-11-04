@@ -39,29 +39,30 @@ public class ButtonClicker : MonoBehaviour
 
     private void GenerateRandomLevel(int numberOfRooms, int roomsMaxWight, int roomsMaxHeight, int roomsMinWight, int roomsMinHeight)
     {
-        var numberOfAttempts = 3;
+        var numberOfAttempts = 1;
         var i = 0;
         while (i < numberOfAttempts)
         {
             DestroyCanvasObjects();
 
             var layout = GenerateLevel.Generate(numberOfRooms, roomsMinWight, roomsMaxWight, roomsMinHeight, roomsMaxHeight);
+            
             var minX = layout.Rooms.Min(a=> a.Position.X);
             var maxX = layout.Rooms.Max(a => a.Position.X);
             var minY = layout.Rooms.Min(a => a.Position.Y);
             var maxY = layout.Rooms.Max(a => a.Position.Y);
             var maxRoomSide = Mathf.Max(roomsMaxWight, roomsMaxHeight, roomsMinWight, roomsMinHeight);
 
-            var sizeX = maxX - minX + maxRoomSide * 2;
-            var sizeY = maxY - minY + maxRoomSide * 2;
+            var sizeX = maxX - minX + maxRoomSide * 3;
+            var sizeY = maxY - minY + maxRoomSide * 3;
 
             //int canvasDimension = (int)(Math.Max(roomsMaxHeight, roomsMaxWight) * numberOfRooms * 2 * 1.5);
 
             //var Xoffset = canvasDimension / 2;
             //var Yoffset = canvasDimension / 2;
 
-            var Xoffset = -minX + 3;
-            var Yoffset = -minY + 3;
+            var Xoffset = -minX + 3 + maxRoomSide;
+            var Yoffset = -minY + 3 + maxRoomSide;
 
             ConstractorUI.UIConstractor.GetComponent<ConstractorUI>().InstantiateLevelField(sizeX, sizeY);
 
@@ -121,15 +122,18 @@ public class ButtonClicker : MonoBehaviour
             GenerateEnemies(xoffset, yoffset, levelStructure, layout, indent, occupiedPoints);
             GenerateCollectible(xoffset, yoffset, levelStructure, layout, occupiedPoints);
 
-            Debug.Log(AStar.PathFinder.IsLevelPassable());
+            //Debug.Log(AStar.PathFinder.IsPlayerAndEnimiesConnected());
 
-            if (AStar.PathFinder.IsLevelPassable())
+            if (AStar.PathFinder.IsLevelPassable() && PathFinder.IsPlayerAndEnimiesConnected())
             {
+                occupiedPoints.Clear();
                 return true;
             }
 
+            Debug.Log("not passable");
             i++;
         }
+        occupiedPoints.Clear();
         return false;
 
     }
@@ -262,8 +266,11 @@ public class ButtonClicker : MonoBehaviour
 
 
             var isHorizontal = (rnd.Next(100) > 50);
-            var wallLength = Mathf.RoundToInt(rnd.Next(200, 300) / 100.0f);
-            wallLength = 2;
+            var wallLength = 2;
+            if (rnd.Next(100)> 50)
+            {
+                wallLength = 3;
+            }
 
             if (isHorizontal)
             {
@@ -311,6 +318,15 @@ public class ButtonClicker : MonoBehaviour
                     if (tile.TileType == TileType.Empty)
                     {
                         tile.TileType = TileType.Wall;
+                        var spikes = new Dictionary<SpikeType, bool>()
+                        {
+                            [SpikeType.Left] = false,
+                            [SpikeType.Right] = false,
+                            [SpikeType.Top] = false,
+                            [SpikeType.Bottom] = false,
+                        };
+
+                        tile.Options = spikes;
 
                     }
                     X++;
@@ -353,6 +369,15 @@ public class ButtonClicker : MonoBehaviour
                     if (tile.TileType == TileType.Empty)
                     {
                         tile.TileType = TileType.Wall;
+                        var spikes = new Dictionary<SpikeType, bool>()
+                        {
+                            [SpikeType.Left] = false,
+                            [SpikeType.Right] = false,
+                            [SpikeType.Top] = false,
+                            [SpikeType.Bottom] = false,
+                        };
+
+                        tile.Options = spikes;
                         occupiedPoints.Add(new Point(tile.x, tile.y));
 
                     }
@@ -382,7 +407,8 @@ public class ButtonClicker : MonoBehaviour
                 continue;
             }
 
-            var numberOfEnemy = 1;
+            var numberOfEnemy = room.Square > 30 ? 2 : 1; 
+            
             var i = 1;
             while (i <= numberOfEnemy)
             {
@@ -497,6 +523,16 @@ public class ButtonClicker : MonoBehaviour
                 if (tile.TileType == TileType.Empty)
                 {
                     tile.TileType = TileType.Wall;
+                    var spikes = new Dictionary<SpikeType, bool>()
+                    {
+                        [SpikeType.Left] = false,
+                        [SpikeType.Right] = false,
+                        [SpikeType.Top] = false,
+                        [SpikeType.Bottom] = false,
+                    };
+
+                    tile.Options = spikes;
+
                     i++;
                     occupiedPoints.Add(new Point(tile.x, tile.y));
                 }
@@ -515,12 +551,17 @@ public class ButtonClicker : MonoBehaviour
         scrollRectTransform.anchoredPosition = new Vector2(-blockWidth * Xoffset, -blockHight * Yoffset);
 
         var allTiles = ConstractorUI.MainLayerOnCanvas.transform;
+
+        var q = transformToArray(allTiles).Where(a => a.y >= 60);
         foreach (Transform tile in allTiles)
         {
             var tileLevelInfo = tile.gameObject.GetComponent<LevelInfo>();
             try
             {
-                TileOnCanvas.SetTileType(tile.gameObject, levelStructure[tileLevelInfo.x, tileLevelInfo.y].TileType);
+                if (tileLevelInfo.IsActive)
+                {
+                    TileOnCanvas.SetTileType(tile.gameObject, levelStructure[tileLevelInfo.x, tileLevelInfo.y].TileType);
+                }
             }
             catch
             {
@@ -528,6 +569,19 @@ public class ButtonClicker : MonoBehaviour
             }
            
         }
+    }
+
+    public static List<LevelInfo> transformToArray(Transform tr)
+    {
+        var result = new List<LevelInfo>();
+        foreach (Transform tile in tr)
+        {
+            var tileLevelInfo = tile.gameObject.GetComponent<LevelInfo>();
+            result.Add(tileLevelInfo);
+
+        }
+
+        return result;
     }
 
     private static void GenerateDoors(int Xoffset, int Yoffset, LevelInfo[,] levelStructure, LayoutGrid2D<int> layout)
@@ -734,6 +788,7 @@ public class ButtonClicker : MonoBehaviour
     public void OnGenerateLevelButtonClick()
     {
         var mainGameObject = ConstractorUI.MainGame.transform;
+        Debug.Log(AStar.PathFinder.IsPlayerAndEnimiesConnected());
 
         Globals.GenerateLevel(mainGameObject, GameplaySettings.MainCamera);
 
@@ -872,6 +927,15 @@ public class ButtonClicker : MonoBehaviour
         {
             children.Add(child.gameObject);
         };
+
+        children.ForEach(delegate (GameObject a)
+        {
+            var tileLevelInfo = a.GetComponent<LevelInfo>();
+            if (tileLevelInfo != null)
+            {
+                tileLevelInfo.IsActive = false;
+            }
+        });
         children.ForEach(child => Destroy(child));
     }
 
