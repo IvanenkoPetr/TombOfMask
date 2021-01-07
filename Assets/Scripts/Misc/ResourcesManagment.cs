@@ -13,6 +13,13 @@ public static class ResourcesManagment
         return result;
     }
 
+    public static List<List<LevelInfoDto>> LoadLevelStructureInDto(string levelName)
+    {
+        var levelStructureInText = Resources.Load<TextAsset>(levelName).text;
+        var result = DeserializeLevelStructureInDto(levelStructureInText);
+        return result;
+    }
+
     private static LevelInfo[,] DeserializeLevelStructure(string levelStractureInText)
     {
         var serializer = new XmlSerializer(typeof(List<List<LevelInfoDto>>));
@@ -26,7 +33,7 @@ public static class ResourcesManagment
             {
                 for (var j = 0; j < levelStructureFromText[0].Count; j++)
                 {
-                    var levelElement = GameObject.Instantiate(EditorPrefabsSettings.Prefabs.TileButton).GetComponent< LevelInfo>();
+                    var levelElement = GameObject.Instantiate(EditorPrefabsSettings.Prefabs.TileButton).GetComponent<LevelInfo>();
 
                     levelElement.x = levelStructureFromText[i][j].x;
                     levelElement.y = levelStructureFromText[i][j].y;
@@ -51,4 +58,18 @@ public static class ResourcesManagment
             return levelStructure;
         }
     }
+
+    private static List<List<LevelInfoDto>> DeserializeLevelStructureInDto(string levelStractureInText)
+    {
+        var serializer = new XmlSerializer(typeof(List<List<LevelInfoDto>>));
+
+        using (TextReader reader = new StringReader(levelStractureInText))
+        {
+            var levelStructureFromText = (List<List<LevelInfoDto>>)serializer.Deserialize(reader);
+            return levelStructureFromText;
+
+        }
+
+    }
 }
+

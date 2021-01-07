@@ -22,15 +22,58 @@ public class ButtonClicker : MonoBehaviour
         ConstractorUI.LevelGenerationMenu.SetActive(true);
     }
 
+    public void OnSaveLevelPartButtonClick()
+    {
+        var levelPartName = GameObject.Find("LevelPartNameInputField").GetComponent<InputField>().text;
+        var pathToFile = $@"C:\Unity\TombOfMask\Assets\Resources\RandomLevelParts\RandomLevelPart{levelPartName}.txt";
+
+        var levelStructure = Globals.LevelStructure;
+        var levelInText = SerializeLevelStructure(levelStructure);
+        File.WriteAllText(pathToFile, levelInText);
+
+        ConstractorUI.EditorCanvas.SetActive(true);
+        ConstractorUI.MainGame.SetActive(true);
+        ConstractorUI.LevelGenerationMenu.SetActive(false);
+    }
+
+    public void OnLoadLevelPartButtonClick()
+    {
+        var levelPartName = GameObject.Find("LevelPartNameInputField").GetComponent<InputField>().text;
+        var pathToFile = $@"RandomLevelParts\RandomLevelPart{levelPartName}";
+
+        var levelStructureInText = Resources.Load<TextAsset>(pathToFile).text;
+        DeserializeLevelStructure(levelStructureInText);
+        DrawLevelInEditor();
+
+        ConstractorUI.EditorCanvas.SetActive(true);
+        ConstractorUI.MainGame.SetActive(true);
+        ConstractorUI.LevelGenerationMenu.SetActive(false);
+    }
+
+    public void OnGenerateTwoPartLevelButtonClick()
+    {
+        var firstLevelPartName = int.Parse(GameObject.Find("FirstLevelPartNameInputField").GetComponent<InputField>().text);
+        var secondLevelPartName = int.Parse(GameObject.Find("SecondLevelPartNameInputField").GetComponent<InputField>().text);
+
+
+        //GenerateRandomLevel(numberOfRooms, roomsMaxWight, roomsMaxHeight, roomsMinWight, roomsMinHeight);
+        ArcadeLavelGeneration.GenerateTwoPartLevel(firstLevelPartName, secondLevelPartName);
+
+        ConstractorUI.EditorCanvas.SetActive(true);
+        ConstractorUI.MainGame.SetActive(true);
+        ConstractorUI.LevelGenerationMenu.SetActive(false);
+    }
+
     public void OnGenerateRandomLevelButtonClick()
     {
         var numberOfRooms = int.Parse(GameObject.Find("NumberOfRoomsInputField").GetComponent<InputField>().text);
-        var roomsMaxWight = int.Parse(GameObject.Find("RoomMaxWidthInputField").GetComponent<InputField>().text);
-        var roomsMaxHeight = int.Parse(GameObject.Find("RoomMaxHeightInputField").GetComponent<InputField>().text);
-        var roomsMinWight = int.Parse(GameObject.Find("RoomMinWidthInputField").GetComponent<InputField>().text);
-        var roomsMinHeight = int.Parse(GameObject.Find("RoomMinHeightInputField").GetComponent<InputField>().text);
+        //var roomsMaxWight = int.Parse(GameObject.Find("RoomMaxWidthInputField").GetComponent<InputField>().text);
+        //var roomsMaxHeight = int.Parse(GameObject.Find("RoomMaxHeightInputField").GetComponent<InputField>().text);
+        //var roomsMinWight = int.Parse(GameObject.Find("RoomMinWidthInputField").GetComponent<InputField>().text);
+        //var roomsMinHeight = int.Parse(GameObject.Find("RoomMinHeightInputField").GetComponent<InputField>().text);
 
-        GenerateRandomLevel(numberOfRooms, roomsMaxWight, roomsMaxHeight, roomsMinWight, roomsMinHeight);
+        //GenerateRandomLevel(numberOfRooms, roomsMaxWight, roomsMaxHeight, roomsMinWight, roomsMinHeight);
+        ArcadeLavelGeneration.GenerateRandomLevel(numberOfRooms);
 
         ConstractorUI.EditorCanvas.SetActive(true);
         ConstractorUI.MainGame.SetActive(true);
@@ -807,42 +850,52 @@ public class ButtonClicker : MonoBehaviour
     {
         var levelStructureInText = Resources.Load<TextAsset>("LevelStructure").text;
         DeserializeLevelStructure(levelStructureInText);
+        DrawLevelInEditor();
 
+    }
+
+    public static void DrawLevelInEditor()
+    {
         var levelStructure = Globals.LevelStructure;
         var allTiles = ConstractorUI.MainLayerOnCanvas.transform;
         foreach (Transform tile in allTiles)
         {
-            var tileLevelInfo = tile.gameObject.GetComponent<LevelInfo>();
-            var infoInLevelStructure = levelStructure[tileLevelInfo.x, tileLevelInfo.y];
-            TileOnCanvas.SetTileType(tile.gameObject, infoInLevelStructure.TileType);
-
-            if (infoInLevelStructure.Options != null)
+            try
             {
-                var currentRectTransform = tile.gameObject.GetComponent<RectTransform>();
-                var tileOnCanvas = tile.gameObject.GetComponent<TileOnCanvas>();
-                var constractorObject = ConstractorUI.UIConstractor.GetComponent<ConstractorUI>();
+                var tileLevelInfo = tile.gameObject.GetComponent<LevelInfo>();
+                var infoInLevelStructure = levelStructure[tileLevelInfo.x, tileLevelInfo.y];
+                TileOnCanvas.SetTileType(tile.gameObject, infoInLevelStructure.TileType);
 
-                var tileGameObject = Instantiate(constractorObject.SpikesButton, ConstractorUI.SpikeLayerOnCanvas.transform);
-                var RectTransform = tileGameObject.GetComponent<RectTransform>();
-                RectTransform.anchoredPosition = currentRectTransform.anchoredPosition;
-                tileOnCanvas.SpikesTile = tileGameObject;
-
-                if (infoInLevelStructure.Options is IEnumerable<KeyValuePair<SpikeType, bool>>)
+                if (infoInLevelStructure.Options != null)
                 {
-                    foreach (var spikeInfo in infoInLevelStructure.Options as IEnumerable<KeyValuePair<SpikeType, bool>>)
+                    var currentRectTransform = tile.gameObject.GetComponent<RectTransform>();
+                    var tileOnCanvas = tile.gameObject.GetComponent<TileOnCanvas>();
+                    var constractorObject = ConstractorUI.UIConstractor.GetComponent<ConstractorUI>();
+
+                    var tileGameObject = Instantiate(constractorObject.SpikesButton, ConstractorUI.SpikeLayerOnCanvas.transform);
+                    var RectTransform = tileGameObject.GetComponent<RectTransform>();
+                    RectTransform.anchoredPosition = currentRectTransform.anchoredPosition;
+                    tileOnCanvas.SpikesTile = tileGameObject;
+
+                    if (infoInLevelStructure.Options is IEnumerable<KeyValuePair<SpikeType, bool>>)
                     {
-                        tileGameObject.transform.Find(spikeInfo.Key.ToString()).gameObject.SetActive(spikeInfo.Value);
+                        foreach (var spikeInfo in infoInLevelStructure.Options as IEnumerable<KeyValuePair<SpikeType, bool>>)
+                        {
+                            tileGameObject.transform.Find(spikeInfo.Key.ToString()).gameObject.SetActive(spikeInfo.Value);
+                        }
                     }
                 }
             }
+            catch
+            {
+
+            }
 
         }
-
     }
 
     public void OnSaveLevelIntoText()
     {
-        var constractorObject = ConstractorUI.UIConstractor.GetComponent<ConstractorUI>();
         var levelStructure = Globals.LevelStructure;
         var levelInText = SerializeLevelStructure(levelStructure);
         var folder = Application.persistentDataPath;

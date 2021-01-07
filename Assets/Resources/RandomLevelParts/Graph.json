@@ -1,0 +1,54 @@
+{
+  "Graph": [
+
+    {
+      "src": "RandomLevelParts\\LevelStartStructure",
+      "dst": [
+        "RandomLevelParts\\RandomLevelPart1",
+        "RandomLevelParts\\RandomLevelPart2"
+      ]
+    },
+    {
+      "src": "RandomLevelParts\\RandomLevelPart1",
+      "dst": [
+        "RandomLevelParts\\RandomLevelPart2",
+        "RandomLevelParts\\RandomLevelPart3",
+        "RandomLevelParts\\RandomLevelPart4",
+        "RandomLevelParts\\RandomLevelPart5"
+      ]
+    },
+    {
+      "src": "RandomLevelParts\\RandomLevelPart2",
+      "dst": [
+        "RandomLevelParts\\RandomLevelPart1",
+        "RandomLevelParts\\RandomLevelPart5"
+
+      ]
+    },
+    {
+      "src": "RandomLevelParts\\RandomLevelPart3",
+      "dst": [
+        "RandomLevelParts\\RandomLevelPart1",
+        "RandomLevelParts\\RandomLevelPart5"
+
+      ]
+    },
+    {
+      "src": "RandomLevelParts\\RandomLevelPart4",
+      "dst": [
+        "RandomLevelParts\\RandomLevelPart2",
+        "RandomLevelParts\\RandomLevelPart5"
+
+      ]
+    },
+    {
+      "src": "RandomLevelParts\\RandomLevelPart5",
+      "dst": [
+        "RandomLevelParts\\RandomLevelPart2",
+        "RandomLevelParts\\RandomLevelPart3",
+        "RandomLevelParts\\RandomLevelPart4"
+
+      ]
+    } 
+  ]
+}

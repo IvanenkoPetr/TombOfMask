@@ -51,7 +51,7 @@ public class LevelSelectionSceneController : MonoBehaviour
         levelSelectionButtonInfo.Level = level;
 
         var button = gameObject.GetComponent<Button>();
-        //button.onClick.AddListener(levelSelectionButtonInfo.OnLevelButtonClick);
+        button.onClick.AddListener(levelSelectionButtonInfo.OnLevelButtonClick);
         button.onClick.AddListener(GenerateScene);
 
         var textGameObject = gameObject.transform.Find("Text");
