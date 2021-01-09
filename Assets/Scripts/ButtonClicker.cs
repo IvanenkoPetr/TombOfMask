@@ -57,11 +57,31 @@ public class ButtonClicker : MonoBehaviour
 
 
         //GenerateRandomLevel(numberOfRooms, roomsMaxWight, roomsMaxHeight, roomsMinWight, roomsMinHeight);
-        ArcadeLavelGeneration.GenerateTwoPartLevel(firstLevelPartName, secondLevelPartName);
+        ArcadeLevelGeneration.GenerateTwoPartLevel(firstLevelPartName, secondLevelPartName);
 
         ConstractorUI.EditorCanvas.SetActive(true);
         ConstractorUI.MainGame.SetActive(true);
         ConstractorUI.LevelGenerationMenu.SetActive(false);
+    }
+
+    public void OnArcadeButtonClick()
+    {
+        var mainGameObject = ConstractorUI.MainGame.transform;
+
+        Globals.LoadAllLevelParts();
+        
+        ArcadeLevelGeneration.GenerateRandomLevel(4);
+        Globals.IsArcadeMode = true;
+        Globals.GenerateLevel(mainGameObject, GameplaySettings.MainCamera);
+
+        var canvas = ConstractorUI.EditorCanvas;
+        canvas.SetActive(false);
+
+        var mainGame = ConstractorUI.MainGame;
+        mainGame.SetActive(true);
+
+        var gameMenu = ConstractorUI.GameMenu;
+        gameMenu.SetActive(true);
     }
 
     public void OnGenerateRandomLevelButtonClick()
@@ -73,7 +93,7 @@ public class ButtonClicker : MonoBehaviour
         //var roomsMinHeight = int.Parse(GameObject.Find("RoomMinHeightInputField").GetComponent<InputField>().text);
 
         //GenerateRandomLevel(numberOfRooms, roomsMaxWight, roomsMaxHeight, roomsMinWight, roomsMinHeight);
-        ArcadeLavelGeneration.GenerateRandomLevel(numberOfRooms);
+        ArcadeLevelGeneration.GenerateRandomLevel(numberOfRooms);
 
         ConstractorUI.EditorCanvas.SetActive(true);
         ConstractorUI.MainGame.SetActive(true);
@@ -831,7 +851,6 @@ public class ButtonClicker : MonoBehaviour
     public void OnGenerateLevelButtonClick()
     {
         var mainGameObject = ConstractorUI.MainGame.transform;
-        Debug.Log(AStar.PathFinder.IsPlayerAndEnimiesConnected());
 
         Globals.GenerateLevel(mainGameObject, GameplaySettings.MainCamera);
 

@@ -51,6 +51,7 @@ MonoBehaviour:
   Hatch: {fileID: 8423889115213933310, guid: cdcb8f4ae4b35fc40aaf8a840af03632, type: 3}
   Star: {fileID: 5773472471227886461, guid: f93633a5f9f46b1458d04ae231a1747c, type: 3}
   Exit: {fileID: 96740717466995710, guid: 6b0ebf3f67490eb4a966693a284683b6, type: 3}
+  Lava: {fileID: 8171218729648426995, guid: 8057d302ace740a4aaff6f5465356703, type: 3}
   SoundController: {fileID: 9192048093154319536, guid: f90fbd5244f0e334d8fd4a214866e0cf,
     type: 3}
   MainCamera: {fileID: 3178048115198671084, guid: 0ae952f556cf2274da74a1171dafebc4,

@@ -11,6 +11,7 @@ public class GamePlayPrefabs : MonoBehaviour
     public GameObject Hatch;
     public GameObject Star;
     public GameObject Exit;
+    public GameObject Lava;
 
     public GameObject SoundController;
     public GameObject MainCamera;

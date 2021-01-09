@@ -16,7 +16,10 @@ public class PlayerMovement : MonoBehaviour
     private float wallCollisionAnimationSpeed = 0.2f;
     private List<Sequence> animationSequence = new List<Sequence>();
 
+    public GameObject Lava;
+
     public event Action<GameObject> WallCollisionEvent;
+    public event Action<GameObject> PlayerMovedUp;
 
     // Start is called before the first frame update
     void Start()
@@ -24,6 +27,7 @@ public class PlayerMovement : MonoBehaviour
         positionOnPreviousFrame = transform.position;
         PlayerSpeed = SavingGlobalSettings.Settings.RemoteSettings.PlayerSpeed;
         IsCanChangeDirectionInMovement = SavingGlobalSettings.Settings.RemoteSettings.IsCanChangeDirectionInMovement;
+
     }
 
     // Update is called once per frame
@@ -36,6 +40,24 @@ public class PlayerMovement : MonoBehaviour
         else
         {
             MovementWithChangeDirection();
+        }
+
+        if(transform.position.y + 10 > Globals.LevelStructure.GetLength(1))
+        {            
+            PlayerMovedUp(gameObject);
+        }
+
+        if(Lava != null)
+        {
+            var height = Lava.GetComponent<SpriteRenderer>().bounds.size.y/2;
+            if(Lava.transform.position.y + height > transform.position.y)
+            {
+                //var camera = GamePlayPrefabsSettings.Prefabs.MainCamera;
+                //camera.transform.SetParent(null);
+                GameplaySettings.MainCamera.transform.SetParent(null);
+                Destroy(gameObject);
+            }
+
         }
     }  
     
@@ -73,8 +95,9 @@ public class PlayerMovement : MonoBehaviour
         {
             if (MovementUtils.CheckSpikesCollision(newPositionInfo.nextTile, MovementDirection))
             {
-                var camera = GamePlayPrefabsSettings.Prefabs.MainCamera;
-                camera.transform.SetParent(null);
+                //var camera = GamePlayPrefabsSettings.Prefabs.MainCamera;
+                //camera.transform.SetParent(null);
+                GameplaySettings.MainCamera.transform.SetParent(null);
                 Destroy(transform.gameObject);
             }
             else

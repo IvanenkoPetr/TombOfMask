@@ -5,8 +5,9 @@ using System.Linq;
 using UnityEngine;
 
 
-public class ArcadeLavelGeneration
+public class ArcadeLevelGeneration
 {
+    private static string CurrentLevelPart;
     public static void GenerateRandomLevel(int numberOfLevelParts)
     {
 
@@ -15,8 +16,8 @@ public class ArcadeLavelGeneration
         var isFirstPart = true;
         while (numberOfLevelParts > 0)
         {
-            var isFinalPart = numberOfLevelParts == 1;
-            var levelPart = GetNextLevelPart(currentLevelPart, isFirstPart, isFinalPart);
+
+            var levelPart = GetNextLevelPart(currentLevelPart, isFirstPart);
             currentLevelPart = levelPart.name;
             SetNextLevelPart(fullLevelStructure, levelPart.structure);
             numberOfLevelParts--;
@@ -31,6 +32,8 @@ public class ArcadeLavelGeneration
             {
                 finalLevelStructure[i, j].TileType = fullLevelStructure[j][i].TileType;
                 finalLevelStructure[i, j].Options = fullLevelStructure[j][i].Options;
+                finalLevelStructure[i, j].x = i;
+                finalLevelStructure[i, j].y = j;
             }
         }
 
@@ -39,16 +42,12 @@ public class ArcadeLavelGeneration
         ButtonClicker.DrawLevelInEditor();
     }
 
-    private static (List<List<LevelInfoDto>> structure, string name) GetNextLevelPart(string currentLevelPart, bool isFirstPart, bool isFinalPart)
+    private static (List<List<LevelInfoDto>> structure, string name) GetNextLevelPart(string currentLevelPart, bool isFirstPart)
     {
         string newLevelPartName;
         if (isFirstPart)
         {
             newLevelPartName = @"RandomLevelParts\LevelStartStructure";
-        }
-        else if(isFinalPart)
-    {
-            newLevelPartName = @"RandomLevelParts\LevelFinishtStructure";
         }
         else
         {
@@ -56,13 +55,27 @@ public class ArcadeLavelGeneration
             var levelGraphText = Resources.Load<TextAsset>("RandomLevelParts/Graph").text;
             var levelGraphObject = JsonConvert.DeserializeObject<LevelGraph>(levelGraphText);
 
-            var destinations = levelGraphObject.Graph.
-                First(a => string.Equals(a.src, currentLevelPart, System.StringComparison.InvariantCultureIgnoreCase)).dst.OrderBy(a=> Random.value);
+            var destinations = new List<KeyValuePair<string, List<List<LevelInfoDto>>>>();
 
-            newLevelPartName = destinations.First();
+            var currentLevelStructure = Globals.AllLevelParts[currentLevelPart];
+            foreach (var levelPart in Globals.AllLevelParts)
+            {
+                if (levelPart.Key.Contains("Start"))
+                {
+                    continue;
+                }
+
+                if (IsLevelPartCanBeConnected(currentLevelStructure, levelPart.Value))
+                {
+                    destinations.Add(levelPart);
+                }
+            }
+
+            newLevelPartName = destinations.OrderBy(a => Random.value).First().Key;
         }
 
-        var newLevelPart = ResourcesManagment.LoadLevelStructureInDto(newLevelPartName);
+        var newLevelPart = Globals.AllLevelParts[newLevelPartName];
+        CurrentLevelPart = newLevelPartName;
 
         return (newLevelPart, newLevelPartName);
     }
@@ -103,10 +116,23 @@ public class ArcadeLavelGeneration
         }
     }
 
+    private static bool IsLevelPartCanBeConnected(List<List<LevelInfoDto>> current, List<List<LevelInfoDto>> next)
+    {
+        var result = false;
+        for(var i = 0; i< current.Count; i++)
+        {
+            if((current[i].Last().TileType == TileType.Empty) && (next[i].First().TileType == TileType.Empty))
+            {
+                result = true;
+                break;
+            }
+        }
+        return result;
+    }
     public static void GenerateTwoPartLevel(int firstLevelPartName, int secondLevelPartName)
     {
 
-        var fullLevelStructure = new List<List<LevelTileInfo>>();        
+        var fullLevelStructure = new List<List<LevelTileInfo>>();
         var levelPart = GetNextLevelPart(firstLevelPartName);
         SetNextLevelPart(fullLevelStructure, levelPart.structure);
 
@@ -127,6 +153,57 @@ public class ArcadeLavelGeneration
         Globals.SetLevelStructure(finalLevelStructure);
 
         ButtonClicker.DrawLevelInEditor();
+    }
+
+    public static void PlayerMovedUp(GameObject player)
+    {
+        if (!Globals.IsArcadeMode)
+        {
+            return;
+        }
+
+        var addedLevelPart = GetNextLevelPart(CurrentLevelPart, false).structure;
+
+        var levelStructure = Globals.LevelStructure;
+        var currentHeith = levelStructure.GetLength(1);
+        var newLevelStructure = new LevelInfo[levelStructure.GetLength(0),
+            levelStructure.GetLength(1) + addedLevelPart[0].Count];
+
+        for (var i = 0; i < levelStructure.GetLength(1); i++)
+        {
+            for (var j = 0; j < levelStructure.GetLength(0); j++)
+            {
+                newLevelStructure[j, i] = levelStructure[j, i];         
+            }
+        }
+
+        for (var i = 0; i < addedLevelPart[0].Count; i++)
+        {
+            for (var j = 0; j < addedLevelPart.Count; j++)
+            {
+                var levelInfo = new LevelInfo();
+                levelInfo.x = j;
+                levelInfo.y = i + levelStructure.GetLength(1);
+                levelInfo.TileType = addedLevelPart[j][i].TileType;
+                if (levelInfo.TileType == TileType.Wall)
+                {
+                    var spikesOnWall = new Dictionary<SpikeType, bool>();
+                    foreach (var spikeDto in addedLevelPart[j][i].SpikesInfo)
+                    {
+                        spikesOnWall.Add(spikeDto.SpikeType, spikeDto.IsSetted);
+                    }
+
+                    levelInfo.Options = spikesOnWall;                    
+                }
+                newLevelStructure[levelInfo.x, levelInfo.y] = levelInfo;
+            }            
+        }
+
+        Globals.SetLevelStructure(newLevelStructure);
+
+        var mainGameObject = ConstractorUI.MainGame.transform;
+
+        Globals.GenerateLevelPartForArcade(mainGameObject, GameplaySettings.MainCamera, currentHeith);
     }
 
     private class LevelGraph
