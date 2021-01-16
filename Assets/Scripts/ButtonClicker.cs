@@ -93,6 +93,7 @@ public class ButtonClicker : MonoBehaviour
         //var roomsMinHeight = int.Parse(GameObject.Find("RoomMinHeightInputField").GetComponent<InputField>().text);
 
         //GenerateRandomLevel(numberOfRooms, roomsMaxWight, roomsMaxHeight, roomsMinWight, roomsMinHeight);
+        Globals.LoadAllLevelParts();
         ArcadeLevelGeneration.GenerateRandomLevel(numberOfRooms);
 
         ConstractorUI.EditorCanvas.SetActive(true);
