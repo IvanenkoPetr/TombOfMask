@@ -20,6 +20,19 @@ public static class ResourcesManagment
         return result;
     }
 
+    public static List<List<List<LevelInfoDto>>> LoadLevelStructureFromFolderInDto(string folderNamme)
+    {
+        var result = new List<List<List<LevelInfoDto>>>();
+        var levelStructuresInText = Resources.LoadAll<TextAsset>(folderNamme);
+        foreach(var levelPart in levelStructuresInText)
+        {
+            var levelPartDto = DeserializeLevelStructureInDto(levelPart.text);
+            result.Add(levelPartDto);
+        }
+
+        return result;
+    }
+
     private static LevelInfo[,] DeserializeLevelStructure(string levelStractureInText)
     {
         var serializer = new XmlSerializer(typeof(List<List<LevelInfoDto>>));

@@ -12,6 +12,7 @@ public class ArcadeLevelGeneration
     {
 
         var fullLevelStructure = new List<List<LevelTileInfo>>();
+        Globals.LoadAllLevelParts();
         var currentLevelPart = string.Empty;
         var isFirstPart = true;
         while (numberOfLevelParts > 0)

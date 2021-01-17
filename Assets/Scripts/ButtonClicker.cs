@@ -69,7 +69,7 @@ public class ButtonClicker : MonoBehaviour
         var mainGameObject = ConstractorUI.MainGame.transform;
 
         Globals.LoadAllLevelParts();
-        
+
         ArcadeLevelGeneration.GenerateRandomLevel(4);
         Globals.IsArcadeMode = true;
         Globals.GenerateLevel(mainGameObject, GameplaySettings.MainCamera);
@@ -87,13 +87,13 @@ public class ButtonClicker : MonoBehaviour
     public void OnGenerateRandomLevelButtonClick()
     {
         var numberOfRooms = int.Parse(GameObject.Find("NumberOfRoomsInputField").GetComponent<InputField>().text);
-        //var roomsMaxWight = int.Parse(GameObject.Find("RoomMaxWidthInputField").GetComponent<InputField>().text);
-        //var roomsMaxHeight = int.Parse(GameObject.Find("RoomMaxHeightInputField").GetComponent<InputField>().text);
-        //var roomsMinWight = int.Parse(GameObject.Find("RoomMinWidthInputField").GetComponent<InputField>().text);
-        //var roomsMinHeight = int.Parse(GameObject.Find("RoomMinHeightInputField").GetComponent<InputField>().text);
+        var roomsMaxWight = int.Parse(GameObject.Find("RoomMaxWidthInputField").GetComponent<InputField>().text);
+        var roomsMaxHeight = int.Parse(GameObject.Find("RoomMaxHeightInputField").GetComponent<InputField>().text);
+        var roomsMinWight = int.Parse(GameObject.Find("RoomMinWidthInputField").GetComponent<InputField>().text);
+        var roomsMinHeight = int.Parse(GameObject.Find("RoomMinHeightInputField").GetComponent<InputField>().text);
 
-        //GenerateRandomLevel(numberOfRooms, roomsMaxWight, roomsMaxHeight, roomsMinWight, roomsMinHeight);
-        ArcadeLevelGeneration.GenerateRandomLevel(numberOfRooms);
+        GenerateRandomLevel(numberOfRooms, roomsMaxWight, roomsMaxHeight, roomsMinWight, roomsMinHeight);
+        //ArcadeLevelGeneration.GenerateRandomLevel(numberOfRooms);
 
         ConstractorUI.EditorCanvas.SetActive(true);
         ConstractorUI.MainGame.SetActive(true);
@@ -109,8 +109,8 @@ public class ButtonClicker : MonoBehaviour
             DestroyCanvasObjects();
 
             var layout = GenerateLevel.Generate(numberOfRooms, roomsMinWight, roomsMaxWight, roomsMinHeight, roomsMaxHeight);
-            
-            var minX = layout.Rooms.Min(a=> a.Position.X);
+
+            var minX = layout.Rooms.Min(a => a.Position.X);
             var maxX = layout.Rooms.Max(a => a.Position.X);
             var minY = layout.Rooms.Min(a => a.Position.Y);
             var maxY = layout.Rooms.Max(a => a.Position.Y);
@@ -132,10 +132,11 @@ public class ButtonClicker : MonoBehaviour
             var levelStructure = Globals.LevelStructure;
             GenerateRooms(Xoffset, Yoffset, levelStructure, layout);
             GenerateDoors(Xoffset, Yoffset, levelStructure, layout);
-            var isLevelPassable = GenerateItems(Xoffset, Yoffset, levelStructure, layout);
+            var isLevelPassable = GenerateItemsFromTemplate(Xoffset, Yoffset, levelStructure, layout);
             if (isLevelPassable)
             {
                 DrawLevel(Xoffset, Yoffset, levelStructure);
+
                 return;
             }
 
@@ -198,6 +199,69 @@ public class ButtonClicker : MonoBehaviour
         }
         occupiedPoints.Clear();
         return false;
+
+    }
+
+    private bool GenerateItemsFromTemplate(int xoffset, int yoffset, LevelInfo[,] levelStructure, LayoutGrid2D<int> layout)
+    {
+        var levelTemplate = new Dictionary<(int h, int w), List<List<List<LevelInfoDto>>>>();
+
+        var occupiedPoints = new List<AStar.Point>();
+        var firstRoom = layout.Rooms[0];
+        var lastRoom = layout.Rooms[layout.Rooms.Count - 1];
+
+        var indent = firstRoom.Transformation == Edgar.Geometry.TransformationGrid2D.Identity ? 1 : -1;
+        var startPoint = levelStructure[xoffset + firstRoom.Position.X + 1, yoffset + firstRoom.Position.Y + indent];
+        startPoint.TileType = TileType.Player;
+
+        indent = lastRoom.Transformation == Edgar.Geometry.TransformationGrid2D.Identity ? 1 : -1;
+        var endPoint = levelStructure[xoffset + lastRoom.Position.X + 1, yoffset + lastRoom.Position.Y + indent];
+        endPoint.TileType = TileType.Exit;
+
+        foreach (var room in layout.Rooms)
+        {
+            if (room == firstRoom || room == lastRoom || room.IsCorridor)
+            {
+                continue;
+            }
+
+            var roomHeight = room.Outline.BoundingRectangle.Height;
+            var roomWidth = room.Outline.BoundingRectangle.Width;
+            if (!levelTemplate.ContainsKey((roomHeight, roomWidth)))
+            {
+                var folderName = $@"RandomLevelParts\OrdinaryLevelParts\{roomHeight}_{roomWidth}";
+                var roomsTemplates = ResourcesManagment.LoadLevelStructureFromFolderInDto(folderName);
+                levelTemplate.Add((roomHeight, roomWidth), roomsTemplates);
+            }
+
+            var roomTemplate = levelTemplate[(roomHeight, roomWidth)].OrderBy(a => UnityEngine.Random.value).FirstOrDefault();
+            if(roomTemplate != null)
+            {
+                for (var i = 0; i < roomTemplate[0].Count; i++)
+                {
+                    for (var j = 0; j < roomTemplate.Count; j++)
+                    {
+                        var levelPoint = levelStructure[xoffset + room.Position.X + 1 + j, yoffset + room.Position.Y + indent + i];
+                        var templatePoint = roomTemplate[j][i];
+                        levelPoint.TileType = templatePoint.TileType;
+                        if (levelPoint.TileType == TileType.Wall)
+                        {
+                            var spikesOnWall = new Dictionary<SpikeType, bool>();
+                            foreach (var spikeDto in templatePoint.SpikesInfo)
+                            {
+                                spikesOnWall.Add(spikeDto.SpikeType, spikeDto.IsSetted);
+                            }
+
+                            levelPoint.Options = spikesOnWall;
+                        }
+                    }
+
+                }
+            }
+
+        }
+
+        return true;
 
     }
 
@@ -330,7 +394,7 @@ public class ButtonClicker : MonoBehaviour
 
             var isHorizontal = (rnd.Next(100) > 50);
             var wallLength = 2;
-            if (rnd.Next(100)> 50)
+            if (rnd.Next(100) > 50)
             {
                 wallLength = 3;
             }
@@ -470,8 +534,8 @@ public class ButtonClicker : MonoBehaviour
                 continue;
             }
 
-            var numberOfEnemy = room.Square > 30 ? 2 : 1; 
-            
+            var numberOfEnemy = room.Square > 30 ? 2 : 1;
+
             var i = 1;
             while (i <= numberOfEnemy)
             {
@@ -624,13 +688,32 @@ public class ButtonClicker : MonoBehaviour
                 if (tileLevelInfo.IsActive)
                 {
                     TileOnCanvas.SetTileType(tile.gameObject, levelStructure[tileLevelInfo.x, tileLevelInfo.y].TileType);
+                    if (tileLevelInfo.Options != null)
+                    {
+                        var currentRectTransform = tile.gameObject.GetComponent<RectTransform>();
+                        var tileOnCanvas = tile.gameObject.GetComponent<TileOnCanvas>();
+                        var constractorObject = ConstractorUI.UIConstractor.GetComponent<ConstractorUI>();
+
+                        var tileGameObject = Instantiate(constractorObject.SpikesButton, ConstractorUI.SpikeLayerOnCanvas.transform);
+                        var RectTransform = tileGameObject.GetComponent<RectTransform>();
+                        RectTransform.anchoredPosition = currentRectTransform.anchoredPosition;
+                        tileOnCanvas.SpikesTile = tileGameObject;
+
+                        if (tileLevelInfo.Options is IEnumerable<KeyValuePair<SpikeType, bool>>)
+                        {
+                            foreach (var spikeInfo in tileLevelInfo.Options as IEnumerable<KeyValuePair<SpikeType, bool>>)
+                            {
+                                tileGameObject.transform.Find(spikeInfo.Key.ToString()).gameObject.SetActive(spikeInfo.Value);
+                            }
+                        }
+                    }
                 }
             }
             catch
             {
                 Debug.Log($"x={tileLevelInfo.x}, y={tileLevelInfo.y}");
             }
-           
+
         }
     }
 

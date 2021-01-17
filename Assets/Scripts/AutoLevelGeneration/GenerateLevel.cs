@@ -140,8 +140,7 @@ public class LevelLayoutGenerator
 
         var transformations = new List<TransformationGrid2D>()
             {
-                TransformationGrid2D.Identity,
-                TransformationGrid2D.Rotate90
+                TransformationGrid2D.Identity 
             };
 
         for (var i = 0; i <= numberOfRooms; i++)
@@ -171,8 +170,7 @@ public class LevelLayoutGenerator
 
         var transformations = new List<TransformationGrid2D>()
             {
-                TransformationGrid2D.Identity,
-                TransformationGrid2D.Rotate90
+                TransformationGrid2D.Identity
             };
 
    
