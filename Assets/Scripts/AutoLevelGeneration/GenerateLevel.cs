@@ -3,6 +3,7 @@ using Edgar.GraphBasedGenerator.Grid2D;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public static class GenerateLevel
@@ -137,16 +138,18 @@ public class LevelLayoutGenerator
         var roomsTemplates = new List<RoomTemplateGrid2D>();
         var doors = new SimpleDoorModeGrid2D(doorLength: 1, cornerDistance: 2);
         System.Random rnd = new System.Random();
+        var roomWidthArray = Enumerable.Range(roomMinWidth, roomMaxWidth - roomMinWidth + 1).ToArray();
+        var roomHieghtArray = Enumerable.Range(roomMinHeight, roomMaxHeight - roomMinHeight + 1).ToArray();
 
         var transformations = new List<TransformationGrid2D>()
             {
-                TransformationGrid2D.Identity 
+                TransformationGrid2D.Identity
             };
 
         for (var i = 0; i <= numberOfRooms; i++)
         {
             var roomTemplate = new RoomTemplateGrid2D(
-                PolygonGrid2D.GetRectangle(rnd.Next(roomMinWidth, roomMaxWidth), rnd.Next(roomMinHeight, roomMaxHeight)),
+                PolygonGrid2D.GetRectangle(roomWidthArray.OrderBy(a => UnityEngine.Random.value).FirstOrDefault(), roomHieghtArray.OrderBy(a => UnityEngine.Random.value).FirstOrDefault()),
                 doors,
                 allowedTransformations: transformations);
 
