@@ -92,8 +92,9 @@ public class ButtonClicker : MonoBehaviour
         var roomsMinWight = int.Parse(GameObject.Find("RoomMinWidthInputField").GetComponent<InputField>().text);
         var roomsMinHeight = int.Parse(GameObject.Find("RoomMinHeightInputField").GetComponent<InputField>().text);
 
-        GenerateRandomLevel(numberOfRooms, roomsMaxWight, roomsMaxHeight, roomsMinWight, roomsMinHeight);
-        //ArcadeLevelGeneration.GenerateRandomLevel(numberOfRooms);
+        //GenerateRandomLevel(numberOfRooms, roomsMaxWight, roomsMaxHeight, roomsMinWight, roomsMinHeight);
+        Globals.LoadAllLevelParts();
+        ArcadeLevelGeneration.GenerateRandomLevel(numberOfRooms);
 
         ConstractorUI.EditorCanvas.SetActive(true);
         ConstractorUI.MainGame.SetActive(true);
@@ -109,8 +110,8 @@ public class ButtonClicker : MonoBehaviour
             DestroyCanvasObjects();
 
             var layout = GenerateLevel.Generate(numberOfRooms, roomsMinWight, roomsMaxWight, roomsMinHeight, roomsMaxHeight);
-
-            var minX = layout.Rooms.Min(a => a.Position.X);
+            
+            var minX = layout.Rooms.Min(a=> a.Position.X);
             var maxX = layout.Rooms.Max(a => a.Position.X);
             var minY = layout.Rooms.Min(a => a.Position.Y);
             var maxY = layout.Rooms.Max(a => a.Position.Y);

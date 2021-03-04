@@ -20,7 +20,7 @@ public class ArcadeLevelGeneration
 
             var levelPart = GetNextLevelPart(currentLevelPart, isFirstPart);
             currentLevelPart = levelPart.name;
-            SetNextLevelPart(fullLevelStructure, levelPart.structure);
+            SetNextLevelPart(fullLevelStructure, levelPart);
             numberOfLevelParts--;
             isFirstPart = false;
         }
@@ -43,20 +43,18 @@ public class ArcadeLevelGeneration
         ButtonClicker.DrawLevelInEditor();
     }
 
-    private static (List<List<LevelInfoDto>> structure, string name) GetNextLevelPart(string currentLevelPart, bool isFirstPart)
+    private static (List<List<LevelInfoDto>> CurrentLevelPart, Vector2 direction, string name) GetNextLevelPart(string currentLevelPart, bool isFirstPart)
     {
-        string newLevelPartName;
+        (List<List<LevelInfoDto>> CurrentLevelPart, Vector2 direction, string name) result;
         if (isFirstPart)
         {
-            newLevelPartName = @"RandomLevelParts\LevelStartStructure";
+            var name = @"RandomLevelParts\LevelStartStructure";
+            result = ( Globals.AllLevelParts[name], Vector2.up, name);
         }
         else
         {
 
-            var levelGraphText = Resources.Load<TextAsset>("RandomLevelParts/Graph").text;
-            var levelGraphObject = JsonConvert.DeserializeObject<LevelGraph>(levelGraphText);
-
-            var destinations = new List<KeyValuePair<string, List<List<LevelInfoDto>>>>();
+            var destinations = new List<(string levelPartName, Vector2 direction)>();
 
             var currentLevelStructure = Globals.AllLevelParts[currentLevelPart];
             foreach (var levelPart in Globals.AllLevelParts)
@@ -66,19 +64,18 @@ public class ArcadeLevelGeneration
                     continue;
                 }
 
-                if (IsLevelPartCanBeConnected(currentLevelStructure, levelPart.Value))
+                var conection = IsLevelPartCanBeConnected(currentLevelStructure, levelPart.Value);
+                if (conection.IsConnected)
                 {
-                    destinations.Add(levelPart);
+                    destinations.Add((levelPart.Key, conection.direction));
                 }
             }
 
-            newLevelPartName = destinations.OrderBy(a => Random.value).First().Key;
+            var newLevelPart = destinations.OrderBy(a => Random.value).First();
+            result = (Globals.AllLevelParts[newLevelPart.levelPartName], newLevelPart.direction, newLevelPart.levelPartName);
         }
 
-        var newLevelPart = Globals.AllLevelParts[newLevelPartName];
-        CurrentLevelPart = newLevelPartName;
-
-        return (newLevelPart, newLevelPartName);
+        return result; 
     }
 
     private static (List<List<LevelInfoDto>> structure, string name) GetNextLevelPart(int levelPart)
@@ -91,69 +88,105 @@ public class ArcadeLevelGeneration
         return (newLevelPart, newLevelPartName);
     }
 
-    private static void SetNextLevelPart(List<List<LevelTileInfo>> fullLevelStructure, List<List<LevelInfoDto>> levelPart)
+    private static void SetNextLevelPart(List<List<LevelTileInfo>> fullLevelStructure, (List<List<LevelInfoDto>> CurrentLevelPart, Vector2 direction, string name) levelPart)
     {
-        for (var i = 0; i < levelPart[0].Count; i++)
+        if(levelPart.direction == Vector2.up)
         {
-            var row = new List<LevelTileInfo>();
-            for (var j = 0; j < levelPart.Count; j++)
-            {
-                var levelInfo = new LevelTileInfo();
-                levelInfo.TileType = levelPart[j][i].TileType;
-                if (levelInfo.TileType == TileType.Wall)
-                {
-                    var spikesOnWall = new Dictionary<SpikeType, bool>();
-                    foreach (var spikeDto in levelPart[j][i].SpikesInfo)
-                    {
-                        spikesOnWall.Add(spikeDto.SpikeType, spikeDto.IsSetted);
-                    }
+            var currentLevelPartHeight = levelPart.CurrentLevelPart[0].Count;
+            var currentLevelWidth = levelPart.CurrentLevelPart.Count;
 
-                    levelInfo.Options = spikesOnWall;
+            var fullLevelStructureWidth = fullLevelStructure.Count;
+            var fullLevelStructureHeight = fullLevelStructure.FirstOrDefault()?.Count ?? 0;
+
+            var newFullLevelStructureWidth = Globals.ArcadeCurrentLevelPartPosition[Vector2.left] + currentLevelWidth;
+            var newFullLevelStructureHeight = Globals.ArcadeCurrentLevelPartPosition[Vector2.down] + currentLevelPartHeight;
+
+            for (var i = 0; i < newFullLevelStructureHeight; i++)//высота fullLevelStructureHeight
+            {
+                var row = new List<LevelTileInfo>();
+                for (var j = fullLevelStructureWidth; j < newFullLevelStructureWidth; j++)// ширина
+                {
+                    var levelInfo = new LevelTileInfo();
+                    levelInfo.TileType = TileType.Empty;
+
+                    row.Add(levelInfo);
                 }
-                row.Add(levelInfo);
+
+                fullLevelStructure.Add(row);
             }
 
-            fullLevelStructure.Add(row);
+
+            for (var i = 0; i < levelPart.CurrentLevelPart[0].Count; i++)
+            {
+                for (var j = 0; j < levelPart.CurrentLevelPart.Count; j++)
+                {
+                    var levelInfo = fullLevelStructure[i][j];
+                    levelInfo.TileType = levelPart.CurrentLevelPart[j][i].TileType;
+                    if (levelInfo.TileType == TileType.Wall)
+                    {
+                        var spikesOnWall = new Dictionary<SpikeType, bool>();
+                        foreach (var spikeDto in levelPart.CurrentLevelPart[j][i].SpikesInfo)
+                        {
+                            spikesOnWall.Add(spikeDto.SpikeType, spikeDto.IsSetted);
+                        }
+
+                        levelInfo.Options = spikesOnWall;
+                    }
+          
+                }          
+            }
         }
+      
     }
 
-    private static bool IsLevelPartCanBeConnected(List<List<LevelInfoDto>> current, List<List<LevelInfoDto>> next)
+    private static (bool IsConnected, Vector2 direction) IsLevelPartCanBeConnected(List<List<LevelInfoDto>> current, List<List<LevelInfoDto>> next)
     {
-        var result = false;
+        var result = (false, Vector2.zero);
+        
         for(var i = 0; i< current.Count; i++)
         {
             if((current[i].Last().TileType == TileType.Empty) && (next[i].First().TileType == TileType.Empty))
             {
-                result = true;
-                break;
+                result = (true, Vector2.up);
+                return result;
             }
         }
+
+        for(var i = 0; i < current[0].Count; i++) 
+        {
+            if (current.Last()[i].TileType == TileType.Empty && next.First()[i].TileType == TileType.Empty)
+            {
+                result = (true, Vector2.right);
+                return result;
+            }
+        }
+
         return result;
     }
     public static void GenerateTwoPartLevel(int firstLevelPartName, int secondLevelPartName)
     {
 
-        var fullLevelStructure = new List<List<LevelTileInfo>>();
-        var levelPart = GetNextLevelPart(firstLevelPartName);
-        SetNextLevelPart(fullLevelStructure, levelPart.structure);
+        //var fullLevelStructure = new List<List<LevelTileInfo>>();
+        //var levelPart = GetNextLevelPart(firstLevelPartName);
+        //SetNextLevelPart(fullLevelStructure, levelPart.structure);
 
-        levelPart = GetNextLevelPart(secondLevelPartName);
-        SetNextLevelPart(fullLevelStructure, levelPart.structure);
+        //levelPart = GetNextLevelPart(secondLevelPartName);
+        //SetNextLevelPart(fullLevelStructure, levelPart.structure);
 
-        ConstractorUI.UIConstractor.GetComponent<ConstractorUI>().InstantiateLevelField(fullLevelStructure[0].Count, fullLevelStructure.Count);
-        var finalLevelStructure = Globals.LevelStructure;
-        for (var i = 0; i < fullLevelStructure[0].Count; i++)
-        {
-            for (var j = 0; j < fullLevelStructure.Count; j++)
-            {
-                finalLevelStructure[i, j].TileType = fullLevelStructure[j][i].TileType;
-                finalLevelStructure[i, j].Options = fullLevelStructure[j][i].Options;
-            }
-        }
+        //ConstractorUI.UIConstractor.GetComponent<ConstractorUI>().InstantiateLevelField(fullLevelStructure[0].Count, fullLevelStructure.Count);
+        //var finalLevelStructure = Globals.LevelStructure;
+        //for (var i = 0; i < fullLevelStructure[0].Count; i++)
+        //{
+        //    for (var j = 0; j < fullLevelStructure.Count; j++)
+        //    {
+        //        finalLevelStructure[i, j].TileType = fullLevelStructure[j][i].TileType;
+        //        finalLevelStructure[i, j].Options = fullLevelStructure[j][i].Options;
+        //    }
+        //}
 
-        Globals.SetLevelStructure(finalLevelStructure);
+        //Globals.SetLevelStructure(finalLevelStructure);
 
-        ButtonClicker.DrawLevelInEditor();
+        //ButtonClicker.DrawLevelInEditor();
     }
 
     public static void PlayerMovedUp(GameObject player)
@@ -163,7 +196,7 @@ public class ArcadeLevelGeneration
             return;
         }
 
-        var addedLevelPart = GetNextLevelPart(CurrentLevelPart, false).structure;
+        var addedLevelPart = GetNextLevelPart(CurrentLevelPart, false).CurrentLevelPart;
 
         var levelStructure = Globals.LevelStructure;
         var currentHeith = levelStructure.GetLength(1);

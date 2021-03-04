@@ -22,7 +22,15 @@ public static class Globals
         levelStructure = levelInfos;
     }
 
-    private static Dictionary<string, List<List<LevelInfoDto>>> allLevelParts;
+    public static Dictionary<Vector2, int> ArcadeCurrentLevelPartPosition { get; set; } = new Dictionary<Vector2, int>
+    {
+        [Vector2.up] = 0,
+        [Vector2.down] = 0,
+        [Vector2.left] = 0,
+        [Vector2.right] = 0,
+
+    };
+private static Dictionary<string, List<List<LevelInfoDto>>> allLevelParts;
     public static Dictionary<string, List<List<LevelInfoDto>>> AllLevelParts => allLevelParts;
 
     public static void LoadAllLevelParts()
@@ -33,7 +41,7 @@ public static class Globals
         var levelPart = ResourcesManagment.LoadLevelStructureInDto(partName);
         allLevelParts.Add(partName, levelPart);
 
-        for(var i = 1; i <= 5; i++)
+        for(var i = 1; i <= 7; i++)
         {
             partName = $@"RandomLevelParts\RandomLevelPart{i}";
             levelPart = ResourcesManagment.LoadLevelStructureInDto(partName);
@@ -86,12 +94,12 @@ public static class Globals
                         var audio = gameObject.GetComponent<AudioSource>();
                         audio.volume = SavingGlobalSettings.Settings.GameSettings.SoundVolume;
 
-                        if (Globals.IsArcadeMode)
-                        {
-                            var lava = GameObject.Instantiate(GamePlayPrefabsSettings.Prefabs.Lava, gameObjectParent);
-                            lava.transform.position = new Vector3(6, -3, 0);
-                            movement.Lava = lava;
-                        }
+                        //if (Globals.IsArcadeMode)
+                        //{
+                        //    var lava = GameObject.Instantiate(GamePlayPrefabsSettings.Prefabs.Lava, gameObjectParent);
+                        //    lava.transform.position = new Vector3(6, -3, 0);
+                        //    movement.Lava = lava;
+                        //}
 
                         break;
                     case TileType.Collectible:
