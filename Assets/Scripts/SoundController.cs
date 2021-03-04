@@ -64,7 +64,7 @@ public class SoundController : MonoBehaviour
     }
 
 
-    private float DynamicHorizontalScreenBorderPlusOneCell
+    private static float DynamicHorizontalScreenBorderPlusOneCell
     {
         get
         {
@@ -73,7 +73,7 @@ public class SoundController : MonoBehaviour
         }
     }
 
-    private float DynamicVerticalScreenBorderDistancePlusOneCell
+    private static float DynamicVerticalScreenBorderDistancePlusOneCell
     {
         get
         {
@@ -81,7 +81,7 @@ public class SoundController : MonoBehaviour
         }
     }
 
-    private bool IsOnScreenPlusOneCell(Vector3 position)
+    public static bool IsOnScreenPlusOneCell(Vector3 position)
     {
         return (Mathf.Abs(GameplaySettings.MainCamera.transform.position.x - position.x) <= DynamicHorizontalScreenBorderPlusOneCell &&
                 Mathf.Abs(GameplaySettings.MainCamera.transform.position.y - position.y) <= DynamicVerticalScreenBorderDistancePlusOneCell);

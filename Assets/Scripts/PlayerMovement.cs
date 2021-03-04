@@ -15,6 +15,7 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 positionOnPreviousFrame;
     private float wallCollisionAnimationSpeed = 0.2f;
     private List<Sequence> animationSequence = new List<Sequence>();
+    private Vector3 pointWhereLevelWasUpdated;
 
     public GameObject Lava;
 
@@ -25,6 +26,7 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         positionOnPreviousFrame = transform.position;
+        pointWhereLevelWasUpdated = transform.position;
         PlayerSpeed = SavingGlobalSettings.Settings.RemoteSettings.PlayerSpeed;
         IsCanChangeDirectionInMovement = SavingGlobalSettings.Settings.RemoteSettings.IsCanChangeDirectionInMovement;
 
@@ -42,9 +44,14 @@ public class PlayerMovement : MonoBehaviour
             MovementWithChangeDirection();
         }
 
-        if(transform.position.y + 10 > Globals.LevelStructure.GetLength(1))
+        //var levelStructure 
+        if(transform.position.x > Globals.ArcadeCurrentLevelPartPosition[Vector2.left]
+            && transform.position.x < Globals.ArcadeCurrentLevelPartPosition[Vector2.right] 
+            && transform.position.y < Globals.ArcadeCurrentLevelPartPosition[Vector2.up]
+            && transform.position.y > Globals.ArcadeCurrentLevelPartPosition[Vector2.down])
         {            
             PlayerMovedUp(gameObject);
+            pointWhereLevelWasUpdated = transform.position;
         }
 
         if(Lava != null)

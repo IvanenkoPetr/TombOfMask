@@ -119,6 +119,8 @@ public class ConstractorUI : MonoBehaviour
 
     public void InstantiateLevelField(int widthInBlocks, int heightInBlocks)
     {
+        ButtonClicker.DestroyCanvasObjects();
+
         var wallBlockRectTransform = EditorPrefabsSettings.Prefabs.TileButton.GetComponent<RectTransform>();
         var blockWidth = wallBlockRectTransform.rect.width;
         var blockHight = wallBlockRectTransform.rect.height;
@@ -177,19 +179,19 @@ public class ConstractorUI : MonoBehaviour
             LevelStructureList.Add(verticalList);
         }
 
-        var levelStructure = new LevelInfo[LevelStructureList.Count, LevelStructureList[0].Count];
+        var levelStructure = new Dictionary<(int x, int y), LevelInfo>();
         i = 0;
         foreach (var row in LevelStructureList)
         {
             j = 0;
             foreach (var column in row)
             {
-                levelStructure[i, j] = column;
+                levelStructure.Add((i, j), column);
                 j++;
             }
             i++;
         }
 
-        Globals.SetLevelStructure(levelStructure);
+        Globals.SetLevelStructureNew(levelStructure);
     }
 }

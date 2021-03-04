@@ -27,7 +27,7 @@ public class ButtonClicker : MonoBehaviour
         var levelPartName = GameObject.Find("LevelPartNameInputField").GetComponent<InputField>().text;
         var pathToFile = $@"C:\Unity\TombOfMask\Assets\Resources\RandomLevelParts\RandomLevelPart{levelPartName}.txt";
 
-        var levelStructure = Globals.LevelStructure;
+        var levelStructure = Globals.LevelStructureNew;
         var levelInText = SerializeLevelStructure(levelStructure);
         File.WriteAllText(pathToFile, levelInText);
 
@@ -70,7 +70,7 @@ public class ButtonClicker : MonoBehaviour
 
         Globals.LoadAllLevelParts();
 
-        ArcadeLevelGeneration.GenerateRandomLevel(4);
+        ArcadeLevelGeneration.GenerateRandomLevel(1);
         Globals.IsArcadeMode = true;
         Globals.GenerateLevel(mainGameObject, GameplaySettings.MainCamera);
 
@@ -87,10 +87,10 @@ public class ButtonClicker : MonoBehaviour
     public void OnGenerateRandomLevelButtonClick()
     {
         var numberOfRooms = int.Parse(GameObject.Find("NumberOfRoomsInputField").GetComponent<InputField>().text);
-        var roomsMaxWight = int.Parse(GameObject.Find("RoomMaxWidthInputField").GetComponent<InputField>().text);
-        var roomsMaxHeight = int.Parse(GameObject.Find("RoomMaxHeightInputField").GetComponent<InputField>().text);
-        var roomsMinWight = int.Parse(GameObject.Find("RoomMinWidthInputField").GetComponent<InputField>().text);
-        var roomsMinHeight = int.Parse(GameObject.Find("RoomMinHeightInputField").GetComponent<InputField>().text);
+        //var roomsMaxWight = int.Parse(GameObject.Find("RoomMaxWidthInputField").GetComponent<InputField>().text);
+        //var roomsMaxHeight = int.Parse(GameObject.Find("RoomMaxHeightInputField").GetComponent<InputField>().text);
+        //var roomsMinWight = int.Parse(GameObject.Find("RoomMinWidthInputField").GetComponent<InputField>().text);
+        //var roomsMinHeight = int.Parse(GameObject.Find("RoomMinHeightInputField").GetComponent<InputField>().text);
 
         //GenerateRandomLevel(numberOfRooms, roomsMaxWight, roomsMaxHeight, roomsMinWight, roomsMinHeight);
         Globals.LoadAllLevelParts();
@@ -118,12 +118,7 @@ public class ButtonClicker : MonoBehaviour
             var maxRoomSide = Mathf.Max(roomsMaxWight, roomsMaxHeight, roomsMinWight, roomsMinHeight);
 
             var sizeX = maxX - minX + maxRoomSide * 3;
-            var sizeY = maxY - minY + maxRoomSide * 3;
-
-            //int canvasDimension = (int)(Math.Max(roomsMaxHeight, roomsMaxWight) * numberOfRooms * 2 * 1.5);
-
-            //var Xoffset = canvasDimension / 2;
-            //var Yoffset = canvasDimension / 2;
+            var sizeY = maxY - minY + maxRoomSide * 3;   
 
             var Xoffset = -minX + 3 + maxRoomSide;
             var Yoffset = -minY + 3 + maxRoomSide;
@@ -959,14 +954,14 @@ public class ButtonClicker : MonoBehaviour
 
     public static void DrawLevelInEditor()
     {
-        var levelStructure = Globals.LevelStructure;
+        var levelStructure = Globals.LevelStructureNew;
         var allTiles = ConstractorUI.MainLayerOnCanvas.transform;
         foreach (Transform tile in allTiles)
         {
             try
             {
                 var tileLevelInfo = tile.gameObject.GetComponent<LevelInfo>();
-                var infoInLevelStructure = levelStructure[tileLevelInfo.x, tileLevelInfo.y];
+                var infoInLevelStructure = levelStructure[(tileLevelInfo.x, tileLevelInfo.y)];
                 TileOnCanvas.SetTileType(tile.gameObject, infoInLevelStructure.TileType);
 
                 if (infoInLevelStructure.Options != null)
@@ -999,7 +994,7 @@ public class ButtonClicker : MonoBehaviour
 
     public void OnSaveLevelIntoText()
     {
-        var levelStructure = Globals.LevelStructure;
+        var levelStructure = Globals.LevelStructureNew;
         var levelInText = SerializeLevelStructure(levelStructure);
         var folder = Application.persistentDataPath;
         folder = @"C:\temp";
@@ -1007,19 +1002,18 @@ public class ButtonClicker : MonoBehaviour
 
     }
 
-    public string SerializeLevelStructure(LevelInfo[,] levelStructure)
+    public string SerializeLevelStructure(Dictionary<(int x, int y), LevelInfo> levelStructure)
     {
         var formatter = new XmlSerializer(typeof(List<List<LevelInfoDto>>));
 
         var levelStructureDto = new List<List<LevelInfoDto>>();
-        for (var i = 0; i < levelStructure.GetLength(0); i++)
+        for (var i = 0; i <= levelStructure.Max(a => a.Key.x); i++)
         {
             var row = new List<LevelInfoDto>();
-            for (var j = 0; j < levelStructure.GetLength(1); j++)
+            for (var j = 0; j <= levelStructure.Max(a => a.Key.y); j++)
             {
-                row.Add(levelStructure[i, j].ToDTOObject());
+                row.Add(levelStructure[(i, j)].ToDTOObject());
             }
-
             levelStructureDto.Add(row);
         }
 
@@ -1043,12 +1037,12 @@ public class ButtonClicker : MonoBehaviour
             var levelStructureFromText = (List<List<LevelInfoDto>>)serializer.Deserialize(reader);
 
             ConstractorUI.UIConstractor.GetComponent<ConstractorUI>().InstantiateLevelField(levelStructureFromText.Count, levelStructureFromText[0].Count);
-            var levelStructure = Globals.LevelStructure;
+            var levelStructure = Globals.LevelStructureNew;
             for (var i = 0; i < levelStructureFromText.Count; i++)
             {
                 for (var j = 0; j < levelStructureFromText[0].Count; j++)
                 {
-                    var levelElement = levelStructure[i, j];
+                    var levelElement = levelStructure[(i, j)];
 
                     levelElement.x = levelStructureFromText[i][j].x;
                     levelElement.y = levelStructureFromText[i][j].y;
@@ -1069,7 +1063,7 @@ public class ButtonClicker : MonoBehaviour
         }
     }
 
-    private static void DestroyCanvasObjects()
+    public static void DestroyCanvasObjects()
     {
         var children = new List<GameObject>();
         foreach (Transform child in ConstractorUI.MainLayerOnCanvas.transform)
